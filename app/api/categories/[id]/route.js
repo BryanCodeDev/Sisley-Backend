@@ -1,5 +1,7 @@
 import { handleCors, jsonResponse } from '../../../../utils';
 import categoryService from '../../../../modules/categories/category.service';
+import { requirePermission } from '../../../../middleware/requirePermission';
+import { logAudit } from '../../../../utils/audit';
 
 export async function GET(request, { params }) {
   const cors = await handleCors(request);
@@ -21,9 +23,15 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
   const cors = await handleCors(request);
   try {
+    const authResult = await requirePermission(request, 'categories.update');
+    if (!authResult.authorized) {
+      return jsonResponse({ success: false, message: authResult.message }, authResult.status, cors.headers);
+    }
+
     const { id } = params;
     const body = await request.json();
     const category = await categoryService.updateCategory(id, body);
+    await logAudit(authResult.user.sub, 'update_category', 'categories', String(category.id), null, { name: category.name });
     return jsonResponse({ success: true, data: category }, 200, cors.headers);
   } catch (error) {
     console.error('[CATEGORIES] PUT error:', error.message);
@@ -35,8 +43,14 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   const cors = await handleCors(request);
   try {
+    const authResult = await requirePermission(request, 'categories.delete');
+    if (!authResult.authorized) {
+      return jsonResponse({ success: false, message: authResult.message }, authResult.status, cors.headers);
+    }
+
     const { id } = params;
     await categoryService.deleteCategory(id);
+    await logAudit(authResult.user.sub, 'delete_category', 'categories', id, null, null);
     return jsonResponse({ success: true, message: 'Categoría desactivada correctamente' }, 200, cors.headers);
   } catch (error) {
     console.error('[CATEGORIES] DELETE error:', error.message);

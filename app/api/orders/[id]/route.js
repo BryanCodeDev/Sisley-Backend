@@ -1,5 +1,7 @@
 import { handleCors, jsonResponse } from '../../../../utils';
 import orderService from '../../../../modules/orders/order.service';
+import { requirePermission } from '../../../../middleware/requirePermission';
+import { logAudit } from '../../../../utils/audit';
 
 export async function GET(request, { params }) {
   const cors = await handleCors(request);
@@ -21,9 +23,15 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
   const cors = await handleCors(request);
   try {
+    const authResult = await requirePermission(request, 'orders.update');
+    if (!authResult.authorized) {
+      return jsonResponse({ success: false, message: authResult.message }, authResult.status, cors.headers);
+    }
+
     const { id } = params;
     const body = await request.json();
-    await orderService.changeOrderStatus(id, body.status, body.notes, body.userId || null);
+    await orderService.changeOrderStatus(id, body.status, body.notes, authResult.user.sub);
+    await logAudit(authResult.user.sub, 'update_order_status', 'orders', id, null, { status: body.status });
     return jsonResponse({ success: true, message: 'Estado actualizado correctamente' }, 200, cors.headers);
   } catch (error) {
     console.error('[ORDERS] PUT error:', error.message);

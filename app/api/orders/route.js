@@ -1,5 +1,7 @@
 import { handleCors, jsonResponse } from '../../../utils';
 import orderService from '../../../modules/orders/order.service';
+import { requirePermission } from '../../../middleware/requirePermission';
+import { logAudit } from '../../../utils/audit';
 
 export async function GET(request) {
   const cors = await handleCors(request);
@@ -39,8 +41,14 @@ export async function GET(request) {
 export async function POST(request) {
   const cors = await handleCors(request);
   try {
+    const authResult = await requirePermission(request, 'orders.create');
+    if (!authResult.authorized) {
+      return jsonResponse({ success: false, message: authResult.message }, authResult.status, cors.headers);
+    }
+
     const body = await request.json();
     const order = await orderService.createOrder(body);
+    await logAudit(authResult.user.sub, 'create_order', 'orders', String(order.id), null, { orderNumber: order.orderNumber, total: order.total });
     return jsonResponse({ success: true, data: order }, 201, cors.headers);
   } catch (error) {
     console.error('[ORDERS] POST error:', error.message);

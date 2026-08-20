@@ -1,5 +1,7 @@
 import { handleCors, jsonResponse } from '../../../utils';
 import categoryService from '../../../modules/categories/category.service';
+import { requirePermission } from '../../../middleware/requirePermission';
+import { logAudit } from '../../../utils/audit';
 
 export async function GET(request) {
   const cors = await handleCors(request);
@@ -38,8 +40,14 @@ export async function GET(request) {
 export async function POST(request) {
   const cors = await handleCors(request);
   try {
+    const authResult = await requirePermission(request, 'categories.create');
+    if (!authResult.authorized) {
+      return jsonResponse({ success: false, message: authResult.message }, authResult.status, cors.headers);
+    }
+
     const body = await request.json();
     const category = await categoryService.createCategory(body);
+    await logAudit(authResult.user.sub, 'create_category', 'categories', String(category.id), null, { name: category.name });
     return jsonResponse({ success: true, data: category }, 201, cors.headers);
   } catch (error) {
     console.error('[CATEGORIES] POST error:', error.message);

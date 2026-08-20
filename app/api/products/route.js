@@ -1,5 +1,7 @@
 import { handleCors, jsonResponse } from '../../../utils';
 import productService from '../../../modules/products/product.service';
+import { requirePermission } from '../../../middleware/requirePermission';
+import { logAudit } from '../../../utils/audit';
 
 export async function GET(request) {
   const cors = await handleCors(request);
@@ -39,8 +41,14 @@ export async function GET(request) {
 export async function POST(request) {
   const cors = await handleCors(request);
   try {
+    const authResult = await requirePermission(request, 'products.create');
+    if (!authResult.authorized) {
+      return jsonResponse({ success: false, message: authResult.message }, authResult.status, cors.headers);
+    }
+
     const body = await request.json();
     const product = await productService.createProduct(body);
+    await logAudit(authResult.user.sub, 'create_product', 'products', String(product.id), null, { name: product.name });
     return jsonResponse({ success: true, data: product }, 201, cors.headers);
   } catch (error) {
     console.error('[PRODUCTS] POST error:', error.message);
