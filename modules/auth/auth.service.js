@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('../../config');
 const authRepository = require('./auth.repository');
@@ -56,7 +56,6 @@ async function login(email, password) {
 }
 
 async function verifyToken(token) {
-  const config = require('../../config');
   try {
     const decoded = jwt.verify(token, config.jwt.secret);
     return decoded;

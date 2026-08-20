@@ -5,13 +5,15 @@ const corsHeaders = (origin) => ({
   'Access-Control-Allow-Origin': origin || '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Credentials': 'true',
 });
 
 const allowedOrigins = (config.frontendUrl || 'http://localhost:3000').split(',');
 
 function getCorsOrigin(requestOrigin) {
-  if (!requestOrigin) return '*';
-  if (allowedOrigins.includes(requestOrigin)) return requestOrigin;
+  if (requestOrigin) {
+    if (allowedOrigins.includes(requestOrigin)) return requestOrigin;
+  }
   return allowedOrigins[0] || '*';
 }
 
