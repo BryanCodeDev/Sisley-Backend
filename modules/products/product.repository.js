@@ -167,6 +167,31 @@ async function findBySlug(slug) {
   return product;
 }
 
+async function findVariantById(variantId) {
+  const pool = getPool();
+  const [rows] = await pool.query(
+    `SELECT pv.*, p.name AS product_name, p.price AS product_price
+     FROM product_variants pv
+     JOIN products p ON pv.product_id = p.id
+     WHERE pv.id = ? LIMIT 1`,
+    [variantId]
+  );
+  const row = rows[0];
+  if (!row) return null;
+  return {
+    id: row.id,
+    sku: row.sku,
+    price: Number(row.price),
+    color: row.color,
+    size: row.size,
+    stock: parseInt(row.stock, 10),
+    status: row.status,
+    productId: row.product_id,
+    productName: row.product_name,
+    productPrice: Number(row.product_price),
+  };
+}
+
 async function count(filters = {}) {
   const pool = getPool();
   const conditions = [];
@@ -239,6 +264,7 @@ module.exports = {
   findAll,
   findById,
   findBySlug,
+  findVariantById,
   count,
   create,
   update,

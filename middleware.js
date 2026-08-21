@@ -8,7 +8,24 @@ function getTokenFromRequest(request) {
 }
 
 function isPublicPath(pathname) {
-  const publicPaths = ['/api/auth/login', '/api/auth/logout', '/api/health', '/api/categories', '/api/products', '/api/customers', '/api/orders'];
+  const publicPaths = [
+    '/api/auth/login',
+    '/api/auth/logout',
+    '/api/auth/customer/login',
+    '/api/auth/customer/register',
+    '/api/auth/customer/me',
+    '/api/auth/customer/logout',
+    '/api/health',
+    '/api/categories',
+    '/api/products',
+    '/api/customers',
+    '/api/orders',
+    '/api/cart',
+    '/api/cart/clear',
+    '/api/checkout',
+    '/api/addresses',
+    '/api/inventory',
+  ];
   return publicPaths.some((path) => pathname === path || pathname.startsWith(path + '/'));
 }
 

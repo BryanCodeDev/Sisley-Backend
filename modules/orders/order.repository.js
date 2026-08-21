@@ -15,6 +15,13 @@ const mapOrderRow = (row) => ({
   notes: row.notes,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
+  customerEmail: row.customer_email || null,
+  customerFirstName: row.customer_first_name || null,
+  customerLastName: row.customer_last_name || null,
+  customerPhone: row.customer_phone || null,
+  shippingAddress: row.shipping_address || null,
+  shippingCity: row.shipping_city || null,
+  shippingDepartment: row.shipping_department || null,
 });
 
 const mapItemRow = (row) => ({
@@ -25,6 +32,10 @@ const mapItemRow = (row) => ({
   quantity: parseInt(row.quantity, 10),
   unitPrice: Number(row.unit_price),
   total: Number(row.total),
+  productName: row.product_name || null,
+  variantSku: row.variant_sku || null,
+  variantColor: row.variant_color || null,
+  variantSize: row.variant_size || null,
 });
 
 async function findAll(filters = {}) {
@@ -62,9 +73,14 @@ async function findAll(filters = {}) {
       o.*,
       c.first_name AS customer_first_name,
       c.last_name AS customer_last_name,
-      c.email AS customer_email
+      c.email AS customer_email,
+      c.phone AS customer_phone,
+      sa.address AS shipping_address,
+      sa.city AS shipping_city,
+      sa.department AS shipping_department
     FROM orders o
     LEFT JOIN customers c ON o.customer_id = c.id
+    LEFT JOIN shipping_addresses sa ON o.shipping_address_id = sa.id
     ${where}
     ${orderBy}
     ${limit}
@@ -75,7 +91,14 @@ async function findAll(filters = {}) {
   const orders = rows.map(mapOrderRow);
 
   for (const order of orders) {
-    const [items] = await pool.query('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
+    const [items] = await pool.query(
+      `SELECT oi.*, p.name AS product_name, pv.sku AS variant_sku, pv.color AS variant_color, pv.size AS variant_size
+       FROM order_items oi
+       LEFT JOIN products p ON oi.product_id = p.id
+       LEFT JOIN product_variants pv ON oi.variant_id = pv.id
+       WHERE oi.order_id = ?`,
+      [order.id]
+    );
     order.items = items.map(mapItemRow);
   }
 
@@ -90,9 +113,13 @@ async function findById(id) {
       c.first_name AS customer_first_name,
       c.last_name AS customer_last_name,
       c.email AS customer_email,
-      c.phone AS customer_phone
+      c.phone AS customer_phone,
+      sa.address AS shipping_address,
+      sa.city AS shipping_city,
+      sa.department AS shipping_department
     FROM orders o
     LEFT JOIN customers c ON o.customer_id = c.id
+    LEFT JOIN shipping_addresses sa ON o.shipping_address_id = sa.id
     WHERE o.id = ? LIMIT 1`,
     [id]
   );
@@ -100,7 +127,14 @@ async function findById(id) {
   const order = rows[0] ? mapOrderRow(rows[0]) : null;
   if (!order) return null;
 
-  const [items] = await pool.query('SELECT * FROM order_items WHERE order_id = ?', [id]);
+  const [items] = await pool.query(
+    `SELECT oi.*, p.name AS product_name, pv.sku AS variant_sku, pv.color AS variant_color, pv.size AS variant_size
+     FROM order_items oi
+     LEFT JOIN products p ON oi.product_id = p.id
+     LEFT JOIN product_variants pv ON oi.variant_id = pv.id
+     WHERE oi.order_id = ?`,
+    [id]
+  );
   order.items = items.map(mapItemRow);
 
   const [history] = await pool.query('SELECT * FROM order_status_history WHERE order_id = ? ORDER BY created_at DESC', [id]);

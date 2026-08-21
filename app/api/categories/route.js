@@ -7,6 +7,16 @@ export async function GET(request) {
   const cors = await handleCors(request);
   try {
     const { searchParams } = new URL(request.url);
+    const slug = searchParams.get('slug');
+
+    if (slug) {
+      const category = await categoryService.getCategoryBySlug(slug);
+      if (!category) {
+        return jsonResponse({ success: false, message: 'Categoría no encontrada' }, 404, cors.headers);
+      }
+      return jsonResponse({ success: true, data: category }, 200, cors.headers);
+    }
+
     const filters = {
       page: searchParams.get('page') || '1',
       limit: searchParams.get('limit') || '50',

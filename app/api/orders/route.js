@@ -1,13 +1,14 @@
 import { handleCors, jsonResponse } from '../../../utils';
 import orderService from '../../../modules/orders/order.service';
-import { requirePermission } from '../../../middleware/requirePermission';
+import { getAuthenticatedUser } from '../../../middleware/requirePermission';
 import { logAudit } from '../../../utils/audit';
 
 export async function GET(request) {
   const cors = await handleCors(request);
   try {
+    const user = await getAuthenticatedUser(request);
     const { searchParams } = new URL(request.url);
-    const filters = {
+    let filters = {
       page: searchParams.get('page') || '1',
       limit: searchParams.get('limit') || '20',
       status: searchParams.get('status') || '',
@@ -15,6 +16,15 @@ export async function GET(request) {
       orderBy: searchParams.get('orderBy') || 'newest',
       customerId: searchParams.get('customerId') || '',
     };
+
+    if (!user) {
+      return jsonResponse({ success: false, message: 'No autorizado' }, 401, cors.headers);
+    }
+
+    const isAdmin = user.permissions && user.permissions.includes('orders.read');
+    if (!isAdmin) {
+      filters.customerId = String(user.sub);
+    }
 
     const { items, total } = await orderService.listOrders(filters);
 
