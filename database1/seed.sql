@@ -559,3 +559,124 @@ INSERT INTO settings (`key`, value, type, description) VALUES
 ('shipping_standard', '15000', 'number', 'Costo envío estándar'),
 ('shipping_express', '25000', 'number', 'Costo envío express'),
 ('allow_guest_checkout', 'true', 'boolean', 'Permitir checkout sin registro');
+
+-- ============================================================
+-- INVENTARIO POR VARIANTE Y BODEGA
+-- ============================================================
+-- Regla: stock por variante por bodega.
+-- Variantes agotadas: 3, 11, 18, 24, 29, 42, 46, 60, 75, 109, 148
+-- Variantes bajo stock: 9, 14, 36, 41, 63, 66, 101, 122, 129, 134, 147
+
+INSERT INTO inventory (variant_id, store_id, warehouse_id, stock, min_stock) VALUES
+(1, NULL, 1, 3, 2), (1, NULL, 2, 2, 2), (1, NULL, 3, 0, 2),
+(2, NULL, 1, 4, 2), (2, NULL, 2, 3, 2), (2, NULL, 3, 1, 2),
+(3, NULL, 1, 0, 2), (3, NULL, 2, 0, 2), (3, NULL, 3, 0, 2),
+(7, NULL, 1, 3, 2), (7, NULL, 2, 2, 2), (7, NULL, 3, 1, 2),
+(9, NULL, 1, 1, 2), (9, NULL, 2, 0, 2), (9, NULL, 3, 1, 2),
+(11, NULL, 1, 0, 2), (11, NULL, 2, 0, 2), (11, NULL, 3, 0, 2),
+(14, NULL, 1, 1, 2), (14, NULL, 2, 0, 2), (14, NULL, 3, 0, 2),
+(18, NULL, 1, 0, 2), (18, NULL, 2, 0, 2), (18, NULL, 3, 0, 2),
+(24, NULL, 1, 0, 2), (24, NULL, 2, 0, 2), (24, NULL, 3, 0, 2),
+(29, NULL, 1, 0, 2), (29, NULL, 2, 0, 2), (29, NULL, 3, 0, 2),
+(36, NULL, 1, 1, 2), (36, NULL, 2, 0, 2), (36, NULL, 3, 0, 2),
+(41, NULL, 1, 1, 2), (41, NULL, 2, 1, 2), (41, NULL, 3, 0, 2),
+(42, NULL, 1, 0, 2), (42, NULL, 2, 0, 2), (42, NULL, 3, 0, 2),
+(46, NULL, 1, 0, 2), (46, NULL, 2, 0, 2), (46, NULL, 3, 0, 2),
+(60, NULL, 1, 0, 2), (60, NULL, 2, 0, 2), (60, NULL, 3, 0, 2),
+(63, NULL, 1, 1, 2), (63, NULL, 2, 0, 2), (63, NULL, 3, 0, 2),
+(66, NULL, 1, 1, 2), (66, NULL, 2, 0, 2), (66, NULL, 3, 0, 2),
+(75, NULL, 1, 0, 2), (75, NULL, 2, 0, 2), (75, NULL, 3, 0, 2),
+(101, NULL, 1, 1, 2), (101, NULL, 2, 0, 2), (101, NULL, 3, 0, 2),
+(109, NULL, 1, 0, 2), (109, NULL, 2, 0, 2), (109, NULL, 3, 0, 2),
+(122, NULL, 1, 1, 2), (122, NULL, 2, 0, 2), (122, NULL, 3, 0, 2),
+(129, NULL, 1, 1, 2), (129, NULL, 2, 0, 2), (129, NULL, 3, 0, 2),
+(134, NULL, 1, 1, 2), (134, NULL, 2, 0, 2), (134, NULL, 3, 0, 2),
+(147, NULL, 1, 1, 2), (147, NULL, 2, 0, 2), (147, NULL, 3, 0, 2),
+(148, NULL, 1, 0, 2), (148, NULL, 2, 0, 2), (148, NULL, 3, 0, 2);
+
+INSERT INTO inventory_movements (variant_id, store_id, warehouse_id, type, quantity, reason, reference, user_id) VALUES
+(1, NULL, 1, 'in', 5, 'Stock inicial demo', 'SEED-001', 1),
+(1, NULL, 2, 'in', 5, 'Stock inicial demo', 'SEED-002', 1),
+(1, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-003', 1),
+(2, NULL, 1, 'in', 4, 'Stock inicial demo', 'SEED-004', 1),
+(2, NULL, 2, 'in', 3, 'Stock inicial demo', 'SEED-005', 1),
+(2, NULL, 3, 'in', 1, 'Stock inicial demo', 'SEED-006', 1),
+(3, NULL, 1, 'in', 0, 'Stock inicial demo', 'SEED-007', 1),
+(3, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-008', 1),
+(3, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-009', 1),
+(7, NULL, 1, 'in', 3, 'Stock inicial demo', 'SEED-010', 1),
+(7, NULL, 2, 'in', 2, 'Stock inicial demo', 'SEED-011', 1),
+(7, NULL, 3, 'in', 1, 'Stock inicial demo', 'SEED-012', 1),
+(9, NULL, 1, 'in', 1, 'Stock inicial demo', 'SEED-013', 1),
+(9, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-014', 1),
+(9, NULL, 3, 'in', 1, 'Stock inicial demo', 'SEED-015', 1),
+(11, NULL, 1, 'in', 0, 'Stock inicial demo', 'SEED-016', 1),
+(11, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-017', 1),
+(11, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-018', 1),
+(14, NULL, 1, 'in', 1, 'Stock inicial demo', 'SEED-019', 1),
+(14, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-020', 1),
+(14, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-021', 1),
+(18, NULL, 1, 'in', 0, 'Stock inicial demo', 'SEED-022', 1),
+(18, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-023', 1),
+(18, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-024', 1),
+(24, NULL, 1, 'in', 0, 'Stock inicial demo', 'SEED-025', 1),
+(24, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-026', 1),
+(24, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-027', 1),
+(29, NULL, 1, 'in', 0, 'Stock inicial demo', 'SEED-028', 1),
+(29, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-029', 1),
+(29, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-030', 1),
+(36, NULL, 1, 'in', 1, 'Stock inicial demo', 'SEED-031', 1),
+(36, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-032', 1),
+(36, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-033', 1),
+(41, NULL, 1, 'in', 1, 'Stock inicial demo', 'SEED-034', 1),
+(41, NULL, 2, 'in', 1, 'Stock inicial demo', 'SEED-035', 1),
+(41, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-036', 1),
+(42, NULL, 1, 'in', 0, 'Stock inicial demo', 'SEED-037', 1),
+(42, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-038', 1),
+(42, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-039', 1),
+(46, NULL, 1, 'in', 0, 'Stock inicial demo', 'SEED-040', 1),
+(46, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-041', 1),
+(46, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-042', 1),
+(60, NULL, 1, 'in', 0, 'Stock inicial demo', 'SEED-043', 1),
+(60, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-044', 1),
+(60, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-045', 1),
+(63, NULL, 1, 'in', 1, 'Stock inicial demo', 'SEED-046', 1),
+(63, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-047', 1),
+(63, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-048', 1),
+(66, NULL, 1, 'in', 1, 'Stock inicial demo', 'SEED-049', 1),
+(66, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-050', 1),
+(66, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-051', 1),
+(75, NULL, 1, 'in', 0, 'Stock inicial demo', 'SEED-052', 1),
+(75, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-053', 1),
+(75, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-054', 1),
+(101, NULL, 1, 'in', 1, 'Stock inicial demo', 'SEED-055', 1),
+(101, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-056', 1),
+(101, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-057', 1),
+(109, NULL, 1, 'in', 0, 'Stock inicial demo', 'SEED-058', 1),
+(109, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-059', 1),
+(109, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-060', 1),
+(122, NULL, 1, 'in', 1, 'Stock inicial demo', 'SEED-061', 1),
+(122, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-062', 1),
+(122, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-063', 1),
+(129, NULL, 1, 'in', 1, 'Stock inicial demo', 'SEED-064', 1),
+(129, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-065', 1),
+(129, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-066', 1),
+(134, NULL, 1, 'in', 1, 'Stock inicial demo', 'SEED-067', 1),
+(134, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-068', 1),
+(134, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-069', 1),
+(147, NULL, 1, 'in', 1, 'Stock inicial demo', 'SEED-070', 1),
+(147, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-071', 1),
+(147, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-072', 1),
+(148, NULL, 1, 'in', 0, 'Stock inicial demo', 'SEED-073', 1),
+(148, NULL, 2, 'in', 0, 'Stock inicial demo', 'SEED-074', 1),
+(148, NULL, 3, 'in', 0, 'Stock inicial demo', 'SEED-075', 1);
+
+-- Sincronizar stock de product_variants desde inventory para las variantes demo
+UPDATE product_variants pv
+JOIN (
+  SELECT variant_id, SUM(stock) AS total_stock
+  FROM inventory
+  WHERE variant_id IN (1,2,3,7,9,11,14,18,24,29,36,41,42,46,60,63,66,75,101,109,122,129,134,147,148)
+  GROUP BY variant_id
+) inv ON inv.variant_id = pv.id
+SET pv.stock = inv.total_stock;

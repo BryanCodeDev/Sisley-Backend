@@ -78,10 +78,62 @@ async function getCartTotal(cartId) {
   return rows[0] ? Number(rows[0].total) : 0;
 }
 
+async function mergeSessionCartIntoCustomer(sessionId, customerId) {
+  if (!sessionId || !customerId) return null;
+
+  const sessionCart = await cartRepository.findActiveCartByCustomerOrSession(null, sessionId);
+  const customerCart = await cartRepository.findActiveCartByCustomerOrSession(customerId, null);
+
+  if (!sessionCart || !sessionCart.items || sessionCart.items.length === 0) {
+    return customerCart;
+  }
+
+  if (!customerCart) {
+    await cartRepository.updateCartCustomer(sessionCart.id, customerId);
+    return cartRepository.getCartByCustomerId(customerId);
+  }
+
+  const pool = getPool();
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    for (const item of sessionCart.items) {
+      const [existingRows] = await connection.query(
+        'SELECT id, quantity FROM cart_items WHERE cart_id = ? AND variant_id = ?',
+        [customerCart.id, item.variantId]
+      );
+
+      if (existingRows[0]) {
+        const newQuantity = existingRows[0].quantity + item.quantity;
+        await connection.query(
+          'UPDATE cart_items SET quantity = ?, unit_price = ? WHERE id = ?',
+          [newQuantity, item.unitPrice, existingRows[0].id]
+        );
+      } else {
+        await connection.query(
+          'INSERT INTO cart_items (cart_id, variant_id, quantity, unit_price) VALUES (?, ?, ?, ?)',
+          [customerCart.id, item.variantId, item.quantity, item.unitPrice]
+        );
+      }
+    }
+
+    await connection.query("UPDATE carts SET status = 'converted' WHERE id = ?", [sessionCart.id]);
+    await connection.commit();
+    return cartRepository.getCartByCustomerId(customerId);
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
 module.exports = {
   getCart,
   addItem,
   updateItemQuantity,
   removeItem,
   getCartTotal,
+  mergeSessionCartIntoCustomer,
 };

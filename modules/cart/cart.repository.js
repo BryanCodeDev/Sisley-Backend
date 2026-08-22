@@ -92,6 +92,11 @@ async function createCart({ customerId, sessionId }) {
   return mapCartRow({ id: result.insertId, customer_id: customerId, session_id: sessionId, status: 'active', created_at: new Date(), updated_at: new Date() });
 }
 
+async function updateCartCustomer(cartId, customerId) {
+  const pool = getPool();
+  await pool.query('UPDATE carts SET customer_id = ?, session_id = NULL WHERE id = ?', [customerId, cartId]);
+}
+
 async function addOrUpdateItem(cartId, variantId, quantity, unitPrice) {
   const pool = getPool();
   const [existingRows] = await pool.query(
@@ -140,6 +145,7 @@ module.exports = {
   getCartBySessionId,
   getCartByCustomerId,
   createCart,
+  updateCartCustomer,
   addOrUpdateItem,
   removeItem,
   clearCart,

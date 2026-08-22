@@ -3,7 +3,8 @@
 -- Schema de Base de Datos
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS sisley_platform
+DROP DATABASE IF EXISTS sisley_platform;
+CREATE DATABASE sisley_platform
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
@@ -306,7 +307,7 @@ CREATE TABLE stock_transfers (
 CREATE TABLE carts (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   customer_id INT UNSIGNED NULL,
-  session_id VARCHAR(100) NOT NULL,
+  session_id VARCHAR(100) NULL,
   status ENUM('active', 'abandoned', 'converted') NOT NULL DEFAULT 'active',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

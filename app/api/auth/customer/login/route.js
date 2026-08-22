@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { handleCors, jsonResponse } from '../../../../../utils';
 import authCustomerService from '../../../../../modules/auth-customer/auth-customer.service';
+import cartService from '../../../../../modules/cart/cart.service';
 
 export async function POST(request) {
   const cors = await handleCors(request);
@@ -13,6 +14,15 @@ export async function POST(request) {
     }
 
     const result = await authCustomerService.login(email, password);
+
+    const sessionId = request.headers.get('x-session-id');
+    if (sessionId) {
+      try {
+        await cartService.mergeSessionCartIntoCustomer(sessionId, result.customer.id);
+      } catch {
+        // no bloquear login si el merge falla
+      }
+    }
 
     const response = NextResponse.json(
       { success: true, data: result },
