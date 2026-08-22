@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { verifyToken } from './modules/auth/auth.service';
-import { jsonResponse } from './utils';
 
 function getTokenFromRequest(request) {
   const cookie = request.cookies.get('sisley_token');

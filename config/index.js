@@ -1,4 +1,10 @@
-require('dotenv').config();
+if (typeof process !== 'undefined' && process.cwd && !process.env.NEXT_PUBLIC_SKIP_DOTENV) {
+  try {
+    require('dotenv').config();
+  } catch (error) {
+    // dotenv no disponible en Edge Runtime
+  }
+}
 
 module.exports = {
   env: process.env.NODE_ENV || 'development',
