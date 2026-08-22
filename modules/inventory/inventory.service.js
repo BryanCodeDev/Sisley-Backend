@@ -15,10 +15,24 @@ async function adjustStock(variantId, storeId, warehouseId, quantity, type, reas
   try {
     await connection.beginTransaction();
 
-    const [invRows] = await connection.query(
-      'SELECT id, stock FROM inventory WHERE variant_id = ? AND store_id = ? AND warehouse_id = ?',
-      [variantId, storeId, warehouseId]
-    );
+    let query = 'SELECT id, stock FROM inventory WHERE variant_id = ?';
+    const params = [variantId];
+
+    if (storeId !== null && storeId !== undefined) {
+      query += ' AND store_id = ?';
+      params.push(storeId);
+    } else {
+      query += ' AND store_id IS NULL';
+    }
+
+    if (warehouseId !== null && warehouseId !== undefined) {
+      query += ' AND warehouse_id = ?';
+      params.push(warehouseId);
+    } else {
+      query += ' AND warehouse_id IS NULL';
+    }
+
+    const [invRows] = await connection.query(query, params);
 
     if (!invRows[0]) {
       throw new Error('Registro de inventario no encontrado');

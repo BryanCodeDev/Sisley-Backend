@@ -62,7 +62,7 @@ async function createProduct(data) {
   }
 
   const existingSku = await productRepository.findAll({ search: data.sku });
-  const skuExists = existing.items.find((p) => p.sku === data.sku);
+  const skuExists = existingSku.items.find((p) => p.sku === data.sku);
   if (skuExists) {
     throw new Error('Ya existe un producto con ese SKU');
   }
@@ -84,8 +84,8 @@ async function updateProduct(id, data) {
   }
 
   if (data.sku) {
-    const existing = await productRepository.findAll({ search: data.sku });
-    const skuExists = existing.items.find((p) => p.sku === data.sku && p.id !== id);
+    const existingSku = await productRepository.findAll({ search: data.sku });
+    const skuExists = existingSku.items.find((p) => p.sku === data.sku && p.id !== id);
     if (skuExists) {
       throw new Error('Ya existe un producto con ese SKU');
     }

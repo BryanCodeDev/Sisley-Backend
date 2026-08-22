@@ -18,7 +18,7 @@ async function findAll(filters = {}) {
   const conditions = [];
   const params = [];
 
-  if (filters.status) {
+  if (filters.status && filters.status !== 'all') {
     conditions.push('status = ?');
     params.push(filters.status);
   }
@@ -59,7 +59,7 @@ async function count(filters = {}) {
   const conditions = [];
   const params = [];
 
-  if (filters.status) {
+  if (filters.status && filters.status !== 'all') {
     conditions.push('status = ?');
     params.push(filters.status);
   }
