@@ -27,7 +27,7 @@ function createPool() {
 
 function getPool() {
   if (!pool) {
-    throw new Error('Pool de conexiones no inicializado. Ejecuta createPool() primero.');
+    createPool();
   }
   return pool;
 }

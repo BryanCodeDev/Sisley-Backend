@@ -14,6 +14,7 @@ export async function GET(request) {
       categoryId: searchParams.get('category') || '',
       search: searchParams.get('search') || '',
       orderBy: searchParams.get('orderBy') || 'featured',
+      inStock: searchParams.get('inStock') || '',
     };
 
     const { items, total } = await productService.listProducts(filters);

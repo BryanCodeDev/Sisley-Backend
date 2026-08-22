@@ -38,6 +38,10 @@ async function findAll(filters = {}) {
     params.push(`%${filters.search}%`, `%${filters.search}%`, `%${filters.search}%`);
   }
 
+  if (filters.inStock === 'true') {
+    conditions.push('EXISTS (SELECT 1 FROM product_variants pv WHERE pv.product_id = p.id AND pv.stock > 0)');
+  }
+
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
   const countQuery = `SELECT COUNT(DISTINCT p.id) AS total FROM products p ${where}`;
