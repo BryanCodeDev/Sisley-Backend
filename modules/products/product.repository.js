@@ -132,45 +132,6 @@ async function findById(id) {
   return product;
 }
 
-async function findBySlug(slug) {
-  const pool = getPool();
-  const [rows] = await pool.query(
-    `SELECT 
-      p.*,
-      c.name AS category_name,
-      c.slug AS category_slug
-    FROM products p
-    LEFT JOIN categories c ON p.category_id = c.id
-    WHERE p.slug = ? LIMIT 1`,
-    [slug]
-  );
-
-  const product = rows[0] ? mapRow(rows[0]) : null;
-  if (!product) return null;
-
-  const [variants] = await pool.query('SELECT * FROM product_variants WHERE product_id = ?', [product.id]);
-  product.variants = variants.map((v) => ({
-    id: v.id,
-    sku: v.sku,
-    price: Number(v.price),
-    color: v.color,
-    size: v.size,
-    stock: parseInt(v.stock, 10),
-    status: v.status,
-  }));
-
-  const [images] = await pool.query('SELECT * FROM product_images WHERE product_id = ? ORDER BY position ASC', [product.id]);
-  product.images = images.map((img) => ({
-    id: img.id,
-    url: img.url,
-    altText: img.alt_text,
-    position: img.position,
-    variantId: img.variant_id,
-  }));
-
-  return product;
-}
-
 async function findVariantById(variantId) {
   const pool = getPool();
   const [rows] = await pool.query(
@@ -267,7 +228,6 @@ async function remove(id) {
 module.exports = {
   findAll,
   findById,
-  findBySlug,
   findVariantById,
   count,
   create,

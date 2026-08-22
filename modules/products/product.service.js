@@ -50,10 +50,6 @@ async function getProduct(id) {
   return productRepository.findById(id);
 }
 
-async function getProductBySlug(slug) {
-  return productRepository.findBySlug(slug);
-}
-
 async function createProduct(data) {
   const validation = validateCreate(data);
   if (!validation.valid) {
@@ -107,7 +103,6 @@ module.exports = {
   validateUpdate,
   listProducts,
   getProduct,
-  getProductBySlug,
   createProduct,
   updateProduct,
   deleteProduct,
