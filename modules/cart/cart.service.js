@@ -12,7 +12,7 @@ async function getCart(customerId, sessionId) {
   return cart;
 }
 
-async function addItem(customerId, sessionId, { variantId, quantity, unitPrice }) {
+async function addItem(customerId, sessionId, { variantId, quantity }) {
   if (!variantId || !quantity || quantity <= 0) {
     throw new Error('Datos de item inválidos');
   }
@@ -26,7 +26,7 @@ async function addItem(customerId, sessionId, { variantId, quantity, unitPrice }
   }
 
   const cart = await getCart(customerId, sessionId);
-  const itemId = await cartRepository.addOrUpdateItem(cart.id, variantId, quantity, unitPrice);
+  const itemId = await cartRepository.addOrUpdateItem(cart.id, variantId, quantity, variant.price);
 
   return getCart(customerId, sessionId);
 }

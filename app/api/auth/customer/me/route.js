@@ -8,7 +8,7 @@ async function getAuthenticatedCustomer(request) {
     return null;
   }
 
-  const decoded = authCustomerService.verifyToken(token);
+  const decoded = await authCustomerService.verifyToken(token);
 
   if (!decoded) {
     return null;

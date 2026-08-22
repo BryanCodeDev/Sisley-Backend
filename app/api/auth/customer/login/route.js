@@ -16,8 +16,10 @@ export async function POST(request) {
 
     const response = NextResponse.json(
       { success: true, data: result },
-      200,
-      { headers: cors.headers }
+      {
+        status: 200,
+        headers: cors.headers,
+      }
     );
 
     response.cookies.set('sisley_customer_token', result.token, {

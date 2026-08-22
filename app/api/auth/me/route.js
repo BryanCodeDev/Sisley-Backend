@@ -6,12 +6,11 @@ export async function GET(request) {
   const cors = await handleCors(request);
   try {
     const token = request.cookies.get('sisley_token')?.value;
-
     if (!token) {
       return jsonResponse({ success: false, message: 'No autenticado' }, 401, cors.headers);
     }
 
-    const decoded = verifyToken(token);
+    const decoded = await verifyToken(token);
 
     if (!decoded) {
       return jsonResponse({ success: false, message: 'Token inválido o expirado' }, 401, cors.headers);

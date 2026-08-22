@@ -4,7 +4,7 @@
 -- ============================================================
 -- IMPORTANTE: Datos ficticios para demostración.
 -- Contraseñas: admin123 / manager123 / staff123 / cliente123
--- Hash bcrypt: $2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi
+-- Hash bcrypt: $2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO
 -- ============================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
@@ -98,9 +98,9 @@ INSERT INTO role_permissions (role_id, permission_id) VALUES
 -- ============================================================
 
 INSERT INTO users (id, email, password_hash, first_name, last_name, role_id, phone, status, last_login_at) VALUES
-(1, 'admin@sisley-demo.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin', 'Sisley', 1, '+573000000000', 'active', NOW()),
-(2, 'manager@sisley-demo.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'María', 'González', 2, '+573100000001', 'active', NOW()),
-(3, 'staff@sisley-demo.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Carlos', 'Rodríguez', 3, '+573100000002', 'active', NULL);
+(1, 'admin@sisley-demo.com', '$2b$10$uTygenO6s8oROBm6wcjSfurV4Dn.C.uvDyK/ttspH6BwzC.DuRsGG', 'Admin', 'Sisley', 1, '+573000000000', 'active', NOW()),
+(2, 'manager@sisley-demo.com', '$2b$10$cCCAFIarDaH7XTxJs.qpY.5Zw1MW.AEuQRvoyLB3sWBgjF6VRG8Xq', 'María', 'González', 2, '+573100000001', 'active', NOW()),
+(3, 'staff@sisley-demo.com', '$2b$10$pgVSwrIUGqoYkfQHC8BAoOxu2tv2x6tHKjt0vtY5O03BNGVdWz5bS', 'Carlos', 'Rodríguez', 3, '+573100000002', 'active', NULL);
 
 -- ============================================================
 -- SUCURSALES (3)
@@ -416,26 +416,29 @@ INSERT INTO product_images (id, product_id, variant_id, url, alt_text, position,
 -- ============================================================
 
 INSERT INTO customers (id, email, password_hash, first_name, last_name, phone, document_type, document_number, status, created_at) VALUES
-(1, 'ana.martinez@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Ana', 'Martínez', '+573120000001', 'CC', '1010101001', 'active', NOW()),
-(2, 'carlos.lopez@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Carlos', 'López', '+573120000002', 'CC', '1010101002', 'active', NOW()),
-(3, 'maria.garcia@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'María', 'García', '+573120000003', 'CC', '1010101003', 'active', NOW()),
-(4, 'juan.rodriguez@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Juan', 'Rodríguez', '+573120000004', 'CC', '1010101004', 'active', NOW()),
-(5, 'laura.hernandez@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Laura', 'Hernández', '+573120000005', 'CC', '1010101005', 'active', NOW()),
-(6, 'pedro.sanchez@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Pedro', 'Sánchez', '+573120000006', 'CC', '1010101006', 'active', NOW()),
-(7, 'sandra.diaz@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Sandra', 'Díaz', '+573120000007', 'CC', '1010101007', 'active', NOW()),
-(8, 'diego.moreno@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Diego', 'Moreno', '+573120000008', 'CC', '1010101008', 'active', NOW()),
-(9, 'valentina.torres@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Valentina', 'Torres', '+573120000009', 'CC', '1010101009', 'active', NOW()),
-(10, 'andres.ramirez@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Andrés', 'Ramírez', '+573120000010', 'CC', '1010101010', 'active', NOW()),
-(11, 'camila.vargas@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Camila', 'Vargas', '+573120000011', 'CC', '1010101011', 'active', NOW()),
-(12, 'felipe.castro@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Felipe', 'Castro', '+573120000012', 'CC', '1010101012', 'active', NOW()),
-(13, 'daniela.ortiz@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Daniela', 'Ortiz', '+573120000013', 'CC', '1010101013', 'active', NOW()),
-(14, 'oscar.ruiz@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Óscar', 'Ruiz', '+573120000014', 'CC', '1010101014', 'active', NOW()),
-(15, 'patricia.mendoza@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Patricia', 'Mendoza', '+573120000015', 'CC', '1010101015', 'active', NOW()),
-(16, 'ricardo.gomez@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Ricardo', 'Gómez', '+573120000016', 'CC', '1010101016', 'active', NOW()),
-(17, 'isabella.jimenez@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Isabella', 'Jiménez', '+573120000017', 'CC', '1010101017', 'active', NOW()),
-(18, 'alejandro.vega@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Alejandro', 'Vega', '+573120000018', 'CC', '1010101018', 'active', NOW()),
-(19, 'paula.acosta@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Paula', 'Acosta', '+573120000019', 'CC', '1010101019', 'active', NOW()),
-(20, 'sebastian.pena@email.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Sebastián', 'Peña', '+573120000020', 'CC', '1010101020', 'active', NOW());
+(1, 'ana.martinez@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Ana', 'Martínez', '+573120000001', 'CC', '1010101001', 'active', NOW()),
+(2, 'carlos.lopez@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Carlos', 'López', '+573120000002', 'CC', '1010101002', 'active', NOW()),
+(3, 'maria.garcia@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'María', 'García', '+573120000003', 'CC', '1010101003', 'active', NOW()),
+(4, 'juan.rodriguez@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Juan', 'Rodríguez', '+573120000004', 'CC', '1010101004', 'active', NOW()),
+(5, 'laura.hernandez@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Laura', 'Hernández', '+573120000005', 'CC', '1010101005', 'active', NOW()),
+(6, 'pedro.sanchez@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Pedro', 'Sánchez', '+573120000006', 'CC', '1010101006', 'active', NOW()),
+(7, 'sandra.diaz@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Sandra', 'Díaz', '+573120000007', 'CC', '1010101007', 'active', NOW()),
+(8, 'diego.moreno@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Diego', 'Moreno', '+573120000008', 'CC', '1010101008', 'active', NOW()),
+(9, 'valentina.torres@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Valentina', 'Torres', '+573120000009', 'CC', '1010101009', 'active', NOW()),
+(10, 'andres.ramirez@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Andrés', 'Ramírez', '+573120000010', 'CC', '1010101010', 'active', NOW()),
+(11, 'camila.vargas@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Camila', 'Vargas', '+573120000011', 'CC', '1010101011', 'active', NOW()),
+(12, 'felipe.castro@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Felipe', 'Castro', '+573120000012', 'CC', '1010101012', 'active', NOW()),
+(13, 'daniela.ortiz@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Daniela', 'Ortiz', '+573120000013', 'CC', '1010101013', 'active', NOW()),
+(14, 'oscar.ruiz@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Óscar', 'Ruiz', '+573120000014', 'CC', '1010101014', 'active', NOW()),
+(15, 'patricia.mendoza@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Patricia', 'Mendoza', '+573120000015', 'CC', '1010101015', 'active', NOW()),
+(16, 'ricardo.gomez@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Ricardo', 'Gómez', '+573120000016', 'CC', '1010101016', 'active', NOW()),
+(17, 'isabella.jimenez@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Isabella', 'Jiménez', '+573120000017', 'CC', '1010101017', 'active', NOW()),
+(18, 'alejandro.vega@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Alejandro', 'Vega', '+573120000018', 'CC', '1010101018', 'active', NOW()),
+(19, 'paula.acosta@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Paula', 'Acosta', '+573120000019', 'CC', '1010101019', 'active', NOW()),
+(20, 'sebastian.pena@email.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Sebastián', 'Peña', '+573120000020', 'CC', '1010101020', 'active', NOW()),
+(21, 'cliente.demo@sisley.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Cliente', 'Demo', '+573000000021', 'CC', '1010101021', 'active', NOW()),
+(22, 'maria.garcia@sisley.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'María', 'García', '+573000000022', 'CC', '1010101022', 'active', NOW()),
+(23, 'carlos.rodriguez@sisley.com', '$2b$10$p7.6.7IwgiI9s7.r0PJ7YODZrRX4UUnAD1Qg8svwlo6vRvRHJdyPO', 'Carlos', 'Rodríguez', '+573000000023', 'CC', '1010101023', 'active', NOW());
 
 -- ============================================================
 -- DIRECCIONES (24)

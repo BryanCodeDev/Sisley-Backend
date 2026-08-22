@@ -5,7 +5,7 @@ import authCustomerService from '../../../../modules/auth-customer/auth-customer
 async function getAuthenticatedCustomer(request) {
   const token = request.cookies.get('sisley_customer_token')?.value;
   if (!token) return null;
-  const decoded = authCustomerService.verifyToken(token);
+  const decoded = await authCustomerService.verifyToken(token);
   return decoded;
 }
 
