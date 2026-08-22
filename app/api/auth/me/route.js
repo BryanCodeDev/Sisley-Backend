@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
 import { handleCors, jsonResponse } from '../../../../utils';
 import { verifyToken } from '../../../../modules/auth/auth.service';
+import authRepository from '../../../../modules/auth/auth.repository';
 
 export async function GET(request) {
   const cors = await handleCors(request);
@@ -11,22 +11,27 @@ export async function GET(request) {
     }
 
     const decoded = await verifyToken(token);
-
     if (!decoded) {
       return jsonResponse({ success: false, message: 'Token inválido o expirado' }, 401, cors.headers);
     }
 
-    const { password_hash: _pw, ...safeUser } = decoded;
+    const dbUser = await authRepository.findUserById(decoded.sub);
+
+    if (!dbUser) {
+      return jsonResponse({ success: false, message: 'Usuario no encontrado' }, 404, cors.headers);
+    }
+
+    const { password_hash: _pw, ...safeUser } = dbUser;
 
     return jsonResponse(
       {
         success: true,
         data: {
-          id: decoded.sub,
-          email: decoded.email,
-          firstName: decoded.first_name,
-          lastName: decoded.last_name,
-          phone: decoded.phone,
+          id: safeUser.id,
+          email: safeUser.email,
+          firstName: safeUser.first_name,
+          lastName: safeUser.last_name,
+          phone: safeUser.phone,
           role: decoded.role,
           permissions: decoded.permissions || [],
         },

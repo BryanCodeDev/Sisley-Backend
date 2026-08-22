@@ -36,8 +36,21 @@ async function updateLastLogin(userId) {
   await pool.query('UPDATE users SET last_login_at = ? WHERE id = ?', [new Date(), userId]);
 }
 
+async function findUserById(id) {
+  const pool = getPool();
+  const [rows] = await pool.query(
+    `SELECT id, email, first_name, last_name, phone, status, role_id
+     FROM users
+     WHERE id = ?`,
+    [id]
+  );
+
+  return rows[0] || null;
+}
+
 module.exports = {
   findUserWithRoleAndPermissions,
   findPermissionsByRoleId,
   updateLastLogin,
+  findUserById,
 };
