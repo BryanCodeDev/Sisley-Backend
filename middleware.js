@@ -86,10 +86,15 @@ export async function middleware(request) {
 
   const response = NextResponse.next();
 
+  response.headers.set('X-Middleware-Executed', 'true');
+  response.headers.set('X-Origin-Received', origin || '(none)');
+  response.headers.set('X-CORS-Status', corsHeaders ? 'allowed' : 'blocked');
+
   if (corsHeaders) {
     corsHeaders.forEach((value, key) => {
       response.headers.set(key, value);
     });
+    response.headers.set('Vary', 'Origin');
     console.log(`[CORS] ${request.method} ${pathname} origin=${origin}`);
   } else if (origin) {
     const allowed = getAllowedOrigins();

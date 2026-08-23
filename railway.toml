@@ -1,0 +1,7 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "node database1/migrate.js && npx next start -p $PORT -H 0.0.0.0"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 5
