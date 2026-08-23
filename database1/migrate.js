@@ -2,6 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql2/promise');
 
+if (process.env.NODE_ENV !== 'production') {
+  try {
+    require('dotenv').config();
+  } catch (error) {
+    // dotenv no disponible
+  }
+}
+
 function parseSqlStatements(sql) {
   const statements = [];
   let current = '';

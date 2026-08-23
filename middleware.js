@@ -6,15 +6,23 @@ function getTokenFromRequest(request) {
   return cookie ? cookie.value : null;
 }
 
-function getCorsHeaders(origin) {
-  const allowedOrigins = (appConfig.frontendUrl || 'http://localhost:3000').split(',');
+function normalizeOrigin(origin) {
+  if (!origin) return '';
+  return origin.replace(/\/$/, '');
+}
 
-  if (!origin || !allowedOrigins.includes(origin)) {
+function getCorsHeaders(origin) {
+  const normalizedOrigin = normalizeOrigin(origin);
+  const allowedOrigins = (appConfig.frontendUrl || 'http://localhost:3000')
+    .split(',')
+    .map(o => normalizeOrigin(o));
+
+  if (!normalizedOrigin || !allowedOrigins.includes(normalizedOrigin)) {
     return null;
   }
 
   return new Headers({
-    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Origin': normalizedOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-session-id',
     'Access-Control-Allow-Credentials': 'true',
