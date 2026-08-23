@@ -62,12 +62,13 @@ async function main() {
     const schemaSQL = fs.readFileSync(schemaPath, 'utf8');
     const seedSQL = fs.readFileSync(seedPath, 'utf8');
 
-    const useDBMatch = schemaSQL.match(/USE\s+`?(\w+)`?\s*;/i);
-    const targetDB = useDBMatch ? useDBMatch[1] : DB_NAME;
-
-    const schemaParts = schemaSQL.split(/USE\s+`?(\w+)`?\s*;?\n?/i);
-    const dbSetupSQL = schemaParts[0].trim();
-    const tablesSQL = (schemaParts[2] || '').trim();
+    const useMatch = schemaSQL.match(/USE\s+`?(\w+)`?\s*;/i);
+    if (!useMatch) {
+      throw new Error('No se encontró USE <database> en schema.sql');
+    }
+    const targetDB = useMatch[1];
+    const dbSetupSQL = schemaSQL.substring(0, useMatch.index + useMatch[0].length).trim();
+    const tablesSQL = schemaSQL.substring(useMatch.index + useMatch[0].length).trim();
 
     console.log('[INFO] Ejecutando setup de base de datos...');
     await connection.query(dbSetupSQL);
@@ -79,12 +80,24 @@ async function main() {
 
     if (tablesSQL) {
       console.log('[INFO] Ejecutando tablas...');
-      await connection.query(tablesSQL);
+      const tableStatements = tablesSQL.split(/;\s*\n/).filter((s) => s.trim());
+      for (const stmt of tableStatements) {
+        const sql = stmt.trim();
+        if (sql) {
+          await connection.query(sql + ';');
+        }
+      }
       console.log('[OK] Tablas creadas correctamente.\n');
     }
 
     console.log('[INFO] Ejecutando seed.sql...');
-    await connection.query(seedSQL);
+    const seedStatements = seedSQL.split(/;\s*\n/).filter((s) => s.trim());
+    for (const stmt of seedStatements) {
+      const sql = stmt.trim();
+      if (sql) {
+        await connection.query(sql + ';');
+      }
+    }
     console.log('[OK] seed.sql ejecutado correctamente.\n');
 
     console.log('============================================================');
