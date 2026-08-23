@@ -3,11 +3,26 @@ const path = require('path');
 const mysql = require('mysql2/promise');
 
 async function main() {
-  const DB_HOST = process.env.DB_HOST || process.env.MYSQLHOST || 'localhost';
+  const DB_HOST = process.env.DB_HOST || process.env.MYSQLHOST;
   const DB_PORT = parseInt(process.env.DB_PORT || process.env.MYSQLPORT || '3306', 10);
   const DB_USER = process.env.DB_USER || process.env.MYSQLUSER || 'root';
   const DB_PASSWORD = process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || '';
   const DB_NAME = process.env.DB_NAME || process.env.MYSQL_DATABASE || 'sisley_platform';
+
+  const missing = [];
+  if (!DB_HOST) missing.push('DB_HOST/MYSQLHOST');
+  if (!DB_USER) missing.push('DB_USER/MYSQLUSER');
+  if (!DB_PASSWORD && DB_PASSWORD !== '') missing.push('DB_PASSWORD/MYSQLPASSWORD');
+  if (!DB_NAME) missing.push('DB_NAME/MYSQL_DATABASE');
+
+  if (missing.length > 0) {
+    console.error('\n[ERROR] Faltan variables de base de datos requeridas:');
+    missing.forEach((v) => console.error(` - ${v}`));
+    console.error('\nConfiguralas en Railway → backend → Variables,');
+    console.error('o vinculá el servicio MySQL al backend.\n');
+    process.exitCode = 1;
+    return;
+  }
 
   console.log('============================================================');
   console.log('SISLEY COLOMBIA - MIGRATE');
