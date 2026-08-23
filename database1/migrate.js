@@ -58,6 +58,7 @@ async function main() {
   const DB_PASSWORD = process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || '';
   const DB_NAME = process.env.DB_NAME || process.env.MYSQL_DATABASE || 'sisley_platform';
   const NODE_ENV = process.env.NODE_ENV || 'development';
+  const FORCE_RESET = process.env.FORCE_RESET === 'true';
 
   const missing = [];
   if (!DB_HOST) missing.push('DB_HOST/MYSQLHOST');
@@ -82,6 +83,7 @@ async function main() {
   console.log(`[INFO] DB_HOST: ${DB_HOST}`);
   console.log(`[INFO] DB_PORT: ${DB_PORT}`);
   console.log(`[INFO] DB_USER: ${DB_USER}`);
+  console.log(`[INFO] FORCE_RESET: ${FORCE_RESET}`);
   console.log(`[INFO] FRONTEND_URL: ${process.env.FRONTEND_URL || '(not set)'}`);
   console.log(`[INFO] NEXT_PUBLIC_FRONTEND_URL: ${process.env.NEXT_PUBLIC_FRONTEND_URL || '(not set)'}`);
   console.log('============================================================\n');
@@ -121,8 +123,9 @@ async function main() {
       const upper = stmt.toUpperCase();
 
       if (upper.startsWith('DROP DATABASE')) {
-        if (NODE_ENV !== 'production' && process.env.MIGRATE_DROP_DATABASE === 'true') {
+        if (NODE_ENV !== 'production' || FORCE_RESET) {
           setupStatements.push(stmt);
+          console.log(`[FORCE_RESET] ${stmt}`);
         }
         continue;
       }
@@ -144,6 +147,12 @@ async function main() {
       }
 
       if (upper.startsWith('CREATE TABLE')) {
+        if (FORCE_RESET) {
+          const tableNameMatch = stmt.match(/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?(\w+)`?/i);
+          if (tableNameMatch) {
+            setupStatements.push(`DROP TABLE IF EXISTS \`${tableNameMatch[1]}\``);
+          }
+        }
         tableStatements.push(stmt.replace(/CREATE\s+TABLE\s+`?(\w+)`?/i, 'CREATE TABLE IF NOT EXISTS `$1`'));
         continue;
       }
