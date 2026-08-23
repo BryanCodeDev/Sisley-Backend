@@ -12,8 +12,13 @@ async function main() {
   console.log('============================================================');
   console.log('SISLEY COLOMBIA - MIGRATE');
   console.log('============================================================');
-  console.log(`Host: ${DB_HOST}:${DB_PORT}`);
-  console.log(`Database: ${DB_NAME}`);
+  console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`DB_HOST: ${DB_HOST}`);
+  console.log(`DB_PORT: ${DB_PORT}`);
+  console.log(`DB_USER: ${DB_USER}`);
+  console.log(`DB_NAME: ${DB_NAME}`);
+  console.log(`JWT_SECRET: ${process.env.JWT_SECRET ? '(set)' : '(not set)'}`);
+  console.log(`NEXT_PUBLIC_FRONTEND_URL: ${process.env.NEXT_PUBLIC_FRONTEND_URL}`);
   console.log('============================================================\n');
 
   let connection;
@@ -58,7 +63,10 @@ async function main() {
 
   } catch (error) {
     console.error('\n[ERROR] Fallo en la migración:');
-    console.error(error.message);
+    console.error('Mensaje:', error.message);
+    console.error('Stack:', error.stack);
+    if (error.code) console.error('Codigo:', error.code);
+    if (error.errno) console.error('Errno:', error.errno);
     if (error.sql) {
       console.error('\nSQL que causó el error:');
       console.error(error.sql);
