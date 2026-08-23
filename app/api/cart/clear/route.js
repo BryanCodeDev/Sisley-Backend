@@ -1,13 +1,6 @@
 import { handleCors, jsonResponse } from '../../../../utils';
+import { getAuthenticatedCustomer } from '../../../../middleware/requirePermission';
 import cartService from '../../../../modules/cart/cart.service';
-import authCustomerService from '../../../../modules/auth-customer/auth-customer.service';
-
-async function getAuthenticatedCustomer(request) {
-  const token = request.cookies.get('sisley_customer_token')?.value;
-  if (!token) return null;
-  const decoded = await authCustomerService.verifyToken(token);
-  return decoded;
-}
 
 export async function POST(request) {
   const cors = await handleCors(request);

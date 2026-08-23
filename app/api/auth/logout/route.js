@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { handleCors, jsonResponse } from '../../../../utils';
-import { verifyToken } from '../../../../modules/auth/auth.service';
+import { handleCors, jsonResponse, getClearCookieOptions } from '../../../../utils';
+import { verifyToken, logout } from '../../../../modules/auth/auth.service';
 import { logAudit } from '../../../../utils/audit';
 
 export async function POST(request) {
@@ -16,6 +16,7 @@ export async function POST(request) {
 
     if (decoded) {
       await logAudit(decoded.sub, 'logout', 'auth', null, null, { email: decoded.email });
+      await logout(decoded.sub);
     }
 
     const response = NextResponse.json(
@@ -25,13 +26,7 @@ export async function POST(request) {
         headers: cors.headers,
       }
     );
-    response.cookies.set('sisley_token', '', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 0,
-      path: '/',
-    });
+    response.cookies.set('sisley_token', '', getClearCookieOptions(process.env.NODE_ENV === 'production'));
 
     return response;
   } catch (error) {
@@ -42,13 +37,7 @@ export async function POST(request) {
         headers: cors.headers,
       }
     );
-    response.cookies.set('sisley_token', '', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 0,
-      path: '/',
-    });
+    response.cookies.set('sisley_token', '', getClearCookieOptions(process.env.NODE_ENV === 'production'));
     return response;
   }
 }

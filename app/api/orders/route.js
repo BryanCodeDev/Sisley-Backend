@@ -1,12 +1,18 @@
 import { handleCors, jsonResponse } from '../../../utils';
 import orderService from '../../../modules/orders/order.service';
-import { getAuthenticatedUser } from '../../../middleware/requirePermission';
+import { getAuthenticatedUser, getAuthenticatedCustomer, requirePermission } from '../../../middleware/requirePermission';
 import { logAudit } from '../../../utils/audit';
 
 export async function GET(request) {
   const cors = await handleCors(request);
   try {
-    const user = await getAuthenticatedUser(request);
+    const admin = await getAuthenticatedUser(request);
+    const customer = await getAuthenticatedCustomer(request);
+
+    if (!admin && !customer) {
+      return jsonResponse({ success: false, message: 'No autorizado' }, 401, cors.headers);
+    }
+
     const { searchParams } = new URL(request.url);
     let filters = {
       page: searchParams.get('page') || '1',
@@ -17,13 +23,13 @@ export async function GET(request) {
       customerId: searchParams.get('customerId') || '',
     };
 
-    if (!user) {
-      return jsonResponse({ success: false, message: 'No autorizado' }, 401, cors.headers);
-    }
-
-    const isAdmin = user.permissions && user.permissions.includes('orders.read');
-    if (!isAdmin) {
-      filters.customerId = String(user.sub);
+    if (admin) {
+      const isAdmin = admin.permissions && admin.permissions.includes('orders.read');
+      if (!isAdmin) {
+        filters.customerId = String(admin.sub);
+      }
+    } else if (customer) {
+      filters.customerId = String(customer.sub);
     }
 
     const { items, total } = await orderService.listOrders(filters);

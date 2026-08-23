@@ -1,9 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 const config = require('../../config');
 const authRepository = require('./auth.repository');
 
-function generateToken(user) {
+function generateToken(user, sessionId) {
   const permissions = user.permissions ? user.permissions.split(',') : [];
   return jwt.sign(
     {
@@ -11,6 +12,7 @@ function generateToken(user) {
       email: user.email,
       role: user.role_name,
       permissions,
+      sid: sessionId,
     },
     config.jwt.secret,
     { expiresIn: config.jwt.expiresIn }
@@ -38,7 +40,10 @@ async function login(email, password) {
     throw new Error('Credenciales inválidas');
   }
 
-  const token = generateToken(user);
+  const sessionId = uuidv4();
+  await authRepository.createSession(user.id, sessionId);
+
+  const token = generateToken(user, sessionId);
   const permissions = user.permissions ? user.permissions.split(',') : [];
 
   await authRepository.updateLastLogin(user.id);
@@ -64,8 +69,26 @@ async function verifyToken(token) {
   }
 }
 
+async function validateSession(userId, sessionId) {
+  try {
+    const currentSessionId = await authRepository.getCurrentSessionId(userId);
+    return currentSessionId === sessionId;
+  } catch (error) {
+    if (error.code === 'ER_BAD_FIELD_ERROR') {
+      return true;
+    }
+    throw error;
+  }
+}
+
+async function logout(userId) {
+  await authRepository.clearSession(userId);
+}
+
 module.exports = {
   generateToken,
   login,
   verifyToken,
+  validateSession,
+  logout,
 };

@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 const config = require('../../config');
 const authCustomerRepository = require('./auth-customer.repository');
 
-function generateToken(customer) {
+function generateToken(customer, sessionId) {
   return jwt.sign(
     {
       sub: customer.id,
@@ -10,6 +11,7 @@ function generateToken(customer) {
       type: 'customer',
       firstName: customer.first_name,
       lastName: customer.last_name,
+      sid: sessionId,
     },
     config.jwt.secret,
     { expiresIn: config.jwt.expiresIn }
@@ -37,7 +39,10 @@ async function login(email, password) {
     throw new Error('Credenciales inválidas');
   }
 
-  const token = generateToken(customer);
+  const sessionId = uuidv4();
+  await authCustomerRepository.createSession(customer.id, sessionId);
+
+  const token = generateToken(customer, sessionId);
 
   await authCustomerRepository.updateLastLogin(customer.id);
 
@@ -66,6 +71,18 @@ async function verifyToken(token) {
   }
 }
 
+async function validateSession(customerId, sessionId) {
+  try {
+    const currentSessionId = await authCustomerRepository.getCurrentSessionId(customerId);
+    return currentSessionId === sessionId;
+  } catch (error) {
+    if (error.code === 'ER_BAD_FIELD_ERROR') {
+      return true;
+    }
+    throw error;
+  }
+}
+
 async function findCustomerById(id) {
   return authCustomerRepository.findById(id);
 }
@@ -78,11 +95,17 @@ async function create(data) {
   return authCustomerRepository.create(data);
 }
 
+async function logout(customerId) {
+  await authCustomerRepository.clearSession(customerId);
+}
+
 module.exports = {
   generateToken,
   login,
   verifyToken,
+  validateSession,
   findCustomerById,
   findByEmail,
   create,
+  logout,
 };

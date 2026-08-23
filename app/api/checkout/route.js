@@ -1,16 +1,8 @@
 import { handleCors, jsonResponse } from '../../../utils';
-import { requirePermission } from '../../../middleware/requirePermission';
+import { requirePermission, getAuthenticatedCustomer } from '../../../middleware/requirePermission';
 import { logAudit } from '../../../utils/audit';
 import orderService from '../../../modules/orders/order.service';
 import cartService from '../../../modules/cart/cart.service';
-import authCustomerService from '../../../modules/auth-customer/auth-customer.service';
-
-async function getAuthenticatedCustomer(request) {
-  const token = request.cookies.get('sisley_customer_token')?.value;
-  if (!token) return null;
-  const decoded = await authCustomerService.verifyToken(token);
-  return decoded;
-}
 
 async function getCartForRequest(request) {
   const sessionId = request.headers.get('x-session-id') || 'default-session';

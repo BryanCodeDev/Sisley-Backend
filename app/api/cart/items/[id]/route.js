@@ -1,13 +1,6 @@
 import { handleCors, jsonResponse } from '../../../../../utils';
+import { getAuthenticatedCustomer } from '../../../../../middleware/requirePermission';
 import cartService from '../../../../../modules/cart/cart.service';
-import authCustomerService from '../../../../../modules/auth-customer/auth-customer.service';
-
-async function getAuthenticatedCustomer(request) {
-  const token = request.cookies.get('sisley_customer_token')?.value;
-  if (!token) return null;
-  const decoded = await authCustomerService.verifyToken(token);
-  return decoded;
-}
 
 export async function PUT(request, { params }) {
   const cors = await handleCors(request);
@@ -45,7 +38,7 @@ export async function DELETE(request, { params }) {
     return jsonResponse({ success: true, data: cart }, 200, cors.headers);
   } catch (error) {
     console.error('[CART_ITEMS] DELETE error:', error.message);
-    return jsonResponse({ success: false, message: error.message || 'Error al eliminar item' }, 400, cors.headers);
+    return jsonResponse({ success: false, message: error.message || 'Error al eliminar item' }, 500, cors.headers);
   }
 }
 

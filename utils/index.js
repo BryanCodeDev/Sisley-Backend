@@ -32,6 +32,26 @@ async function handleCors(request) {
   return { origin, headers };
 }
 
+function getCookieOptions(isProduction) {
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    maxAge: 8 * 60 * 60,
+    path: '/',
+  };
+}
+
+function getClearCookieOptions(isProduction) {
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    maxAge: 0,
+    path: '/',
+  };
+}
+
 function jsonResponse(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
     status,
@@ -70,4 +90,6 @@ module.exports = {
   checkDatabase,
   corsHeaders,
   getCorsOrigin,
+  getCookieOptions,
+  getClearCookieOptions,
 };

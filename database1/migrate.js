@@ -158,6 +158,27 @@ async function main() {
       console.log(`[OK] Tablas procesadas correctamente: ${tableStatements.length}\n`);
     }
 
+    console.log('[INFO] Verificando y aplicando migraciones de columnas...');
+    const alterStatements = [
+      "ALTER TABLE users ADD COLUMN current_session_id VARCHAR(36) NULL AFTER last_login_at",
+      "ALTER TABLE users ADD INDEX idx_current_session (current_session_id)",
+      "ALTER TABLE customers ADD COLUMN current_session_id VARCHAR(36) NULL AFTER notes",
+      "ALTER TABLE customers ADD INDEX idx_current_session (current_session_id)",
+    ];
+
+    for (const sql of alterStatements) {
+      try {
+        await connection.query(sql + ';');
+        console.log(`[OK] Migración aplicada: ${sql}`);
+      } catch (error) {
+        if (error.code === 'ER_DUP_FIELDNAME' || error.message.includes('Duplicate column name') || error.message.includes('Duplicate key name')) {
+          console.log(`[SKIP] Ya existe: ${sql}`);
+        } else {
+          console.error(`[ERROR] Fallo en migración: ${sql}`, error.message);
+        }
+      }
+    }
+
     console.log('[INFO] Verificando estado de la base de datos...');
     const [existingTablesRows] = await connection.query('SHOW TABLES');
     const existingTableNames = existingTablesRows.map(row => Object.values(row)[0]);

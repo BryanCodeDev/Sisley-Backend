@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { handleCors, jsonResponse } from '../../../../../utils';
+import { handleCors, jsonResponse, getCookieOptions } from '../../../../../utils';
 import authCustomerService from '../../../../../modules/auth-customer/auth-customer.service';
 
 export async function POST(request) {
@@ -29,7 +29,10 @@ export async function POST(request) {
       status: 'active',
     });
 
-    const token = authCustomerService.generateToken(customer);
+    const sessionId = require('uuid').v4();
+    await authCustomerService.createSession(customer.id, sessionId);
+
+    const token = authCustomerService.generateToken(customer, sessionId);
     const result = {
       token,
       customer: {
@@ -48,13 +51,7 @@ export async function POST(request) {
       }
     );
 
-    response.cookies.set('sisley_customer_token', result.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 8 * 60 * 60,
-      path: '/',
-    });
+    response.cookies.set('sisley_customer_token', result.token, getCookieOptions(process.env.NODE_ENV === 'production'));
 
     return response;
   } catch (error) {

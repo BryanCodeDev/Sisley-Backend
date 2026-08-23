@@ -52,12 +52,14 @@ CREATE TABLE users (
   phone VARCHAR(20),
   status ENUM('active', 'inactive', 'blocked') NOT NULL DEFAULT 'active',
   last_login_at DATETIME NULL,
+  current_session_id VARCHAR(36) NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_users_role FOREIGN KEY (role_id) REFERENCES roles(id),
   INDEX idx_email (email),
   INDEX idx_role (role_id),
-  INDEX idx_status (status)
+  INDEX idx_status (status),
+  INDEX idx_current_session (current_session_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -75,11 +77,13 @@ CREATE TABLE customers (
   document_number VARCHAR(20) NULL,
   status ENUM('active', 'inactive', 'blocked') NOT NULL DEFAULT 'active',
   notes TEXT,
+  current_session_id VARCHAR(36) NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_email (email),
   INDEX idx_document (document_type, document_number),
-  INDEX idx_status (status)
+  INDEX idx_status (status),
+  INDEX idx_current_session (current_session_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================

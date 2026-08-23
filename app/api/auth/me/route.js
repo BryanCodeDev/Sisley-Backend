@@ -1,21 +1,17 @@
 import { handleCors, jsonResponse } from '../../../../utils';
-import { verifyToken } from '../../../../modules/auth/auth.service';
+import { getAuthenticatedUser } from '../../../../middleware/requirePermission';
 import authRepository from '../../../../modules/auth/auth.repository';
 
 export async function GET(request) {
   const cors = await handleCors(request);
   try {
-    const token = request.cookies.get('sisley_token')?.value;
-    if (!token) {
+    const user = await getAuthenticatedUser(request);
+
+    if (!user) {
       return jsonResponse({ success: false, message: 'No autenticado' }, 401, cors.headers);
     }
 
-    const decoded = await verifyToken(token);
-    if (!decoded) {
-      return jsonResponse({ success: false, message: 'Token inválido o expirado' }, 401, cors.headers);
-    }
-
-    const dbUser = await authRepository.findUserById(decoded.sub);
+    const dbUser = await authRepository.findUserById(user.sub);
 
     if (!dbUser) {
       return jsonResponse({ success: false, message: 'Usuario no encontrado' }, 404, cors.headers);
@@ -32,8 +28,8 @@ export async function GET(request) {
           firstName: safeUser.first_name,
           lastName: safeUser.last_name,
           phone: safeUser.phone,
-          role: decoded.role,
-          permissions: decoded.permissions || [],
+          role: user.role,
+          permissions: user.permissions || [],
         },
       },
       200,

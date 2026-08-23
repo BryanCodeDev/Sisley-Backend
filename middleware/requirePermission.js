@@ -1,4 +1,5 @@
-const { verifyToken } = require('../modules/auth/auth.service');
+const { verifyToken, validateSession } = require('../modules/auth/auth.service');
+const { verifyToken: verifyCustomerToken, validateSession: validateCustomerSession } = require('../modules/auth-customer/auth-customer.service');
 
 async function getAuthenticatedUser(request) {
   const token = request.cookies.get('sisley_token')?.value;
@@ -10,6 +11,32 @@ async function getAuthenticatedUser(request) {
   const decoded = await verifyToken(token);
 
   if (!decoded) {
+    return null;
+  }
+
+  const sessionValid = await validateSession(decoded.sub, decoded.sid);
+  if (!sessionValid) {
+    return null;
+  }
+
+  return decoded;
+}
+
+async function getAuthenticatedCustomer(request) {
+  const token = request.cookies.get('sisley_customer_token')?.value;
+
+  if (!token) {
+    return null;
+  }
+
+  const decoded = await verifyCustomerToken(token);
+
+  if (!decoded) {
+    return null;
+  }
+
+  const sessionValid = await validateCustomerSession(decoded.sub, decoded.sid);
+  if (!sessionValid) {
     return null;
   }
 
@@ -32,7 +59,19 @@ async function requirePermission(request, requiredPermission) {
   return { authorized: true, user };
 }
 
+async function requireCustomerAuth(request) {
+  const customer = await getAuthenticatedCustomer(request);
+
+  if (!customer) {
+    return { authorized: false, status: 401, message: 'No autenticado' };
+  }
+
+  return { authorized: true, customer };
+}
+
 module.exports = {
   getAuthenticatedUser,
+  getAuthenticatedCustomer,
   requirePermission,
+  requireCustomerAuth,
 };
