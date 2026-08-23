@@ -74,6 +74,10 @@ async function updateCustomer(id, data) {
   return customerRepository.update(id, data);
 }
 
+async function deleteCustomer(id) {
+  return customerRepository.remove(id);
+}
+
 module.exports = {
   validateCreate,
   validateUpdate,
@@ -81,4 +85,5 @@ module.exports = {
   getCustomer,
   createCustomer,
   updateCustomer,
+  deleteCustomer,
 };

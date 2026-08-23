@@ -107,10 +107,17 @@ async function update(id, data) {
   return findById(id);
 }
 
+async function remove(id) {
+  const pool = getPool();
+  await pool.query('UPDATE customers SET status = ? WHERE id = ?', ['inactive', id]);
+  return findById(id);
+}
+
 module.exports = {
   findAll,
   findById,
   count,
   create,
   update,
+  remove,
 };

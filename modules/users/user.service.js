@@ -60,9 +60,51 @@ async function createUser(data) {
   });
 }
 
+function validateUpdate(id, data) {
+  if (!id) {
+    return { valid: false, message: 'ID requerido' };
+  }
+  if (data.email !== undefined && !String(data.email).trim()) {
+    return { valid: false, message: 'El email no puede estar vacío' };
+  }
+  if (data.status && !['active', 'inactive', 'blocked'].includes(data.status)) {
+    return { valid: false, message: 'Estado inválido' };
+  }
+  return { valid: true };
+}
+
+async function updateUser(id, data) {
+  const validation = validateUpdate(id, data);
+  if (!validation.valid) {
+    throw new Error(validation.message);
+  }
+
+  if (data.email) {
+    const existing = await userRepository.findAll({ search: data.email });
+    const emailExists = existing.items.find((u) => u.email.toLowerCase() === data.email.toLowerCase() && u.id !== id);
+    if (emailExists) {
+      throw new Error('Ya existe un usuario con ese email');
+    }
+  }
+
+  if (data.password) {
+    const passwordHash = await bcrypt.hash(data.password, 10);
+    data.passwordHash = passwordHash;
+  }
+
+  return userRepository.update(id, data);
+}
+
+async function deleteUser(id) {
+  return userRepository.remove(id);
+}
+
 module.exports = {
   validateCreate,
+  validateUpdate,
   listUsers,
   getUser,
   createUser,
+  updateUser,
+  deleteUser,
 };

@@ -106,9 +106,35 @@ async function create(data) {
   return findById(result.insertId);
 }
 
+async function update(id, data) {
+  const pool = getPool();
+  const fields = [];
+  const params = [];
+
+  if (data.email !== undefined) { fields.push('email = ?'); params.push(data.email); }
+  if (data.firstName !== undefined) { fields.push('first_name = ?'); params.push(data.firstName); }
+  if (data.lastName !== undefined) { fields.push('last_name = ?'); params.push(data.lastName); }
+  if (data.phone !== undefined) { fields.push('phone = ?'); params.push(data.phone ?? null); }
+  if (data.roleId !== undefined) { fields.push('role_id = ?'); params.push(data.roleId); }
+  if (data.status !== undefined) { fields.push('status = ?'); params.push(data.status); }
+
+  if (!fields.length) return findById(id);
+
+  await pool.query(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, [...params, id]);
+  return findById(id);
+}
+
+async function remove(id) {
+  const pool = getPool();
+  await pool.query('UPDATE users SET status = ? WHERE id = ?', ['inactive', id]);
+  return findById(id);
+}
+
 module.exports = {
   findAll,
   findById,
   count,
   create,
+  update,
+  remove,
 };

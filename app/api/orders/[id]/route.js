@@ -40,6 +40,25 @@ export async function PUT(request, { params }) {
   }
 }
 
+export async function DELETE(request, { params }) {
+  const cors = await handleCors(request);
+  try {
+    const authResult = await requirePermission(request, 'orders.update');
+    if (!authResult.authorized) {
+      return jsonResponse({ success: false, message: authResult.message }, authResult.status, cors.headers);
+    }
+
+    const { id } = params;
+    const result = await orderService.cancelOrder(id, authResult.user.sub);
+    await logAudit(authResult.user.sub, 'cancel_order', 'orders', id, null, null);
+    return jsonResponse({ success: true, ...result }, 200, cors.headers);
+  } catch (error) {
+    console.error('[ORDERS] DELETE error:', error.message);
+    const status = error.message === 'Pedido no encontrado' ? 404 : error.message === 'No se puede cancelar un pedido en estado actual' ? 400 : 500;
+    return jsonResponse({ success: false, message: error.message || 'Error al cancelar pedido' }, status, cors.headers);
+  }
+}
+
 export async function OPTIONS(request) {
   return handleCors(request);
 }

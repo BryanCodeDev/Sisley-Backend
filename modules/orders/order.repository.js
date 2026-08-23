@@ -223,9 +223,26 @@ async function updateStatus(id, status, notes = null, userId = null) {
   }
 }
 
+async function cancel(id, userId = null) {
+  const pool = getPool();
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    await connection.query('UPDATE orders SET status = ? WHERE id = ?', ['CANCELLED', id]);
+    await connection.query('INSERT INTO order_status_history (order_id, status, notes, created_by) VALUES (?, ?, ?, ?)', [id, 'CANCELLED', 'Cancelado por usuario', userId]);
+    await connection.commit();
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
 module.exports = {
   findAll,
   findById,
   create,
   updateStatus,
+  cancel,
 };

@@ -115,10 +115,24 @@ async function changeOrderStatus(id, status, notes = null, userId = null) {
   await orderRepository.updateStatus(id, status, notes, userId);
 }
 
+async function cancelOrder(id, userId = null) {
+  const allowedStatuses = ['PENDING', 'PAYMENT_PENDING', 'PAID', 'PROCESSING', 'READY_TO_SHIP', 'SHIPPED'];
+  const order = await orderRepository.findById(id);
+  if (!order) {
+    throw new Error('Pedido no encontrado');
+  }
+  if (!allowedStatuses.includes(order.status)) {
+    throw new Error('No se puede cancelar un pedido en estado actual');
+  }
+  await orderRepository.cancel(id, userId);
+  return { success: true, message: 'Pedido cancelado correctamente' };
+}
+
 module.exports = {
   validateCreate,
   listOrders,
   getOrder,
   createOrder,
   changeOrderStatus,
+  cancelOrder,
 };

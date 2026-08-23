@@ -40,6 +40,25 @@ export async function PUT(request, { params }) {
   }
 }
 
+export async function DELETE(request, { params }) {
+  const cors = await handleCors(request);
+  try {
+    const authResult = await requirePermission(request, 'customers.update');
+    if (!authResult.authorized) {
+      return jsonResponse({ success: false, message: authResult.message }, authResult.status, cors.headers);
+    }
+
+    const { id } = params;
+    const customer = await customerService.deleteCustomer(id);
+    await logAudit(authResult.user.sub, 'delete_customer', 'customers', id, null, null);
+    return jsonResponse({ success: true, message: 'Cliente desactivado correctamente', data: customer }, 200, cors.headers);
+  } catch (error) {
+    console.error('[CUSTOMERS] DELETE error:', error.message);
+    const status = error.message === 'Cliente no encontrado' ? 404 : 500;
+    return jsonResponse({ success: false, message: error.message || 'Error al eliminar cliente' }, status, cors.headers);
+  }
+}
+
 export async function OPTIONS(request) {
   return handleCors(request);
 }
