@@ -3,11 +3,11 @@ const path = require('path');
 const mysql = require('mysql2/promise');
 
 async function main() {
-  const DB_HOST = process.env.DB_HOST || 'localhost';
-  const DB_PORT = parseInt(process.env.DB_PORT || '3306', 10);
-  const DB_USER = process.env.DB_USER || 'root';
-  const DB_PASSWORD = process.env.DB_PASSWORD || '';
-  const DB_NAME = process.env.DB_NAME || 'sisley_platform';
+  const DB_HOST = process.env.DB_HOST || process.env.MYSQLHOST || 'localhost';
+  const DB_PORT = parseInt(process.env.DB_PORT || process.env.MYSQLPORT || '3306', 10);
+  const DB_USER = process.env.DB_USER || process.env.MYSQLUSER || 'root';
+  const DB_PASSWORD = process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || '';
+  const DB_NAME = process.env.DB_NAME || process.env.MYSQL_DATABASE || 'sisley_platform';
 
   console.log('============================================================');
   console.log('SISLEY COLOMBIA - MIGRATE');
