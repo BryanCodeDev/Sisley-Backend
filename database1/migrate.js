@@ -95,6 +95,7 @@ async function main() {
       port: DB_PORT,
       user: DB_USER,
       password: DB_PASSWORD,
+      database: DB_NAME,
       multipleStatements: true,
       connectTimeout: 10000
     });
@@ -122,7 +123,7 @@ async function main() {
     for (const stmt of schemaStatements) {
       const upper = stmt.toUpperCase();
 
-      if (upper.startsWith('DROP DATABASE') || upper.startsWith('CREATE DATABASE') || upper.startsWith('USE ')) {
+      if (upper.startsWith('DROP DATABASE') || upper.startsWith('CREATE DATABASE')) {
         continue;
       }
 
