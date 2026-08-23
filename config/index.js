@@ -15,7 +15,7 @@ module.exports = {
     port: parseInt(process.env.DB_PORT || process.env.MYSQLPORT || '3306', 10),
     user: process.env.DB_USER || process.env.MYSQLUSER || 'root',
     password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || '',
-    database: process.env.DB_NAME || process.env.MYSQL_DATABASE || 'sisley_platform',
+    database: process.env.DB_NAME || process.env.MYSQL_DATABASE || 'railway',
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'change_me_in_production',

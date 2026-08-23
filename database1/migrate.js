@@ -56,7 +56,7 @@ async function main() {
   const DB_PORT = parseInt(process.env.DB_PORT || process.env.MYSQLPORT || '3306', 10);
   const DB_USER = process.env.DB_USER || process.env.MYSQLUSER || 'root';
   const DB_PASSWORD = process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || '';
-  const DB_NAME = process.env.DB_NAME || process.env.MYSQL_DATABASE || 'sisley_platform';
+  const DB_NAME = process.env.DB_NAME || process.env.MYSQL_DATABASE || 'railway';
   const NODE_ENV = process.env.NODE_ENV || 'development';
   const FORCE_RESET = process.env.FORCE_RESET === 'true';
 
@@ -117,32 +117,12 @@ async function main() {
     const schemaStatements = parseSqlStatements(schemaSQL);
     const setupStatements = [];
     const tableStatements = [];
-    let targetDB = DB_NAME;
+    const targetDB = DB_NAME;
 
     for (const stmt of schemaStatements) {
       const upper = stmt.toUpperCase();
 
-      if (upper.startsWith('DROP DATABASE')) {
-        if (NODE_ENV !== 'production' || FORCE_RESET) {
-          setupStatements.push(stmt);
-          console.log(`[FORCE_RESET] ${stmt}`);
-        }
-        continue;
-      }
-
-      if (upper.startsWith('CREATE DATABASE')) {
-        const dbNameMatch = stmt.match(/CREATE\s+DATABASE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?(\w+)`?/i);
-        if (dbNameMatch) targetDB = dbNameMatch[1];
-        if (!upper.includes('IF NOT EXISTS')) {
-          setupStatements.push(stmt.replace(/CREATE\s+DATABASE\s+`?(\w+)`?/i, 'CREATE DATABASE IF NOT EXISTS `$1`'));
-        } else {
-          setupStatements.push(stmt);
-        }
-        continue;
-      }
-
-      if (upper.startsWith('USE ')) {
-        setupStatements.push(stmt);
+      if (upper.startsWith('DROP DATABASE') || upper.startsWith('CREATE DATABASE') || upper.startsWith('USE ')) {
         continue;
       }
 
@@ -167,10 +147,6 @@ async function main() {
       await connection.query(sql + ';');
     }
     console.log('[OK] Setup de base de datos ejecutado correctamente.\n');
-
-    console.log(`[INFO] Seleccionando base de datos: ${targetDB}...`);
-    await connection.query(`USE \`${targetDB}\``);
-    console.log(`[OK] Base de datos seleccionada: ${targetDB}\n`);
 
     if (tableStatements.length > 0) {
       console.log('[INFO] Ejecutando tablas...');

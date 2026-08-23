@@ -3,13 +3,6 @@
 -- Schema de Base de Datos
 -- ============================================================
 
-DROP DATABASE IF EXISTS sisley_platform;
-CREATE DATABASE sisley_platform
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-
-USE sisley_platform;
-
 -- ============================================================
 -- ROLES Y PERMISOS
 -- ============================================================
