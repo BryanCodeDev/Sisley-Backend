@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import config from './config';
+import appConfig from './config';
 
 function getTokenFromRequest(request) {
   const cookie = request.cookies.get('sisley_token');
@@ -7,7 +7,7 @@ function getTokenFromRequest(request) {
 }
 
 function getCorsHeaders(origin) {
-  const allowedOrigins = (config.frontendUrl || 'http://localhost:3000').split(',');
+  const allowedOrigins = (appConfig.frontendUrl || 'http://localhost:3000').split(',');
 
   if (!origin || !allowedOrigins.includes(origin)) {
     return null;

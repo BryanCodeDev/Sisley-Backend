@@ -53,18 +53,35 @@ async function main() {
     const seedPath = path.join(__dirname, 'seed.sql');
 
     if (!fs.existsSync(schemaPath)) {
-      throw new Error('No se encontró database/schema.sql');
+      throw new Error('No se encontró database1/schema.sql');
     }
     if (!fs.existsSync(seedPath)) {
-      throw new Error('No se encontró database/seed.sql');
+      throw new Error('No se encontró database1/seed.sql');
     }
 
     const schemaSQL = fs.readFileSync(schemaPath, 'utf8');
     const seedSQL = fs.readFileSync(seedPath, 'utf8');
 
-    console.log('[INFO] Ejecutando schema.sql...');
-    await connection.query(schemaSQL);
-    console.log('[OK] schema.sql ejecutado correctamente.\n');
+    const useDBMatch = schemaSQL.match(/USE\s+`?(\w+)`?\s*;/i);
+    const targetDB = useDBMatch ? useDBMatch[1] : DB_NAME;
+
+    const schemaParts = schemaSQL.split(/USE\s+`?(\w+)`?\s*;?\n?/i);
+    const dbSetupSQL = schemaParts[0].trim();
+    const tablesSQL = (schemaParts[2] || '').trim();
+
+    console.log('[INFO] Ejecutando setup de base de datos...');
+    await connection.query(dbSetupSQL);
+    console.log('[OK] Setup de base de datos ejecutado correctamente.\n');
+
+    console.log(`[INFO] Seleccionando base de datos: ${targetDB}...`);
+    await connection.query(`USE \`${targetDB}\``);
+    console.log(`[OK] Base de datos seleccionada: ${targetDB}\n`);
+
+    if (tablesSQL) {
+      console.log('[INFO] Ejecutando tablas...');
+      await connection.query(tablesSQL);
+      console.log('[OK] Tablas creadas correctamente.\n');
+    }
 
     console.log('[INFO] Ejecutando seed.sql...');
     await connection.query(seedSQL);
