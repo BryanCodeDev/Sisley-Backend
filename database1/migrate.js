@@ -2,12 +2,54 @@ const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql2/promise');
 
+function parseSqlStatements(sql) {
+  const statements = [];
+  let current = '';
+  let inBlockComment = false;
+
+  for (let i = 0; i < sql.length; i++) {
+    if (inBlockComment) {
+      if (sql[i] === '*' && sql[i + 1] === '/') {
+        inBlockComment = false;
+        i++;
+      }
+      continue;
+    }
+
+    if (sql[i] === '-' && sql[i + 1] === '-') {
+      while (i < sql.length && sql[i] !== '\n') i++;
+      continue;
+    }
+
+    if (sql[i] === '/' && sql[i + 1] === '*') {
+      inBlockComment = true;
+      i++;
+      continue;
+    }
+
+    current += sql[i];
+
+    if (sql[i] === ';') {
+      statements.push(current.trim());
+      current = '';
+    }
+  }
+
+  const trimmed = current.trim();
+  if (trimmed) {
+    statements.push(trimmed);
+  }
+
+  return statements.filter(s => s.length > 0);
+}
+
 async function main() {
   const DB_HOST = process.env.DB_HOST || process.env.MYSQLHOST;
   const DB_PORT = parseInt(process.env.DB_PORT || process.env.MYSQLPORT || '3306', 10);
   const DB_USER = process.env.DB_USER || process.env.MYSQLUSER || 'root';
   const DB_PASSWORD = process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || '';
   const DB_NAME = process.env.DB_NAME || process.env.MYSQL_DATABASE || 'sisley_platform';
+  const NODE_ENV = process.env.NODE_ENV || 'development';
 
   const missing = [];
   if (!DB_HOST) missing.push('DB_HOST/MYSQLHOST');
@@ -27,13 +69,13 @@ async function main() {
   console.log('============================================================');
   console.log('SISLEY COLOMBIA - MIGRATE');
   console.log('============================================================');
-  console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
-  console.log(`DB_HOST: ${DB_HOST}`);
-  console.log(`DB_PORT: ${DB_PORT}`);
-  console.log(`DB_USER: ${DB_USER}`);
-  console.log(`DB_NAME: ${DB_NAME}`);
-  console.log(`JWT_SECRET: ${process.env.JWT_SECRET ? '(set)' : '(not set)'}`);
-  console.log(`NEXT_PUBLIC_FRONTEND_URL: ${process.env.NEXT_PUBLIC_FRONTEND_URL}`);
+  console.log(`[INFO] Environment: ${NODE_ENV}`);
+  console.log(`[INFO] Database: ${DB_NAME}`);
+  console.log(`[INFO] DB_HOST: ${DB_HOST}`);
+  console.log(`[INFO] DB_PORT: ${DB_PORT}`);
+  console.log(`[INFO] DB_USER: ${DB_USER}`);
+  console.log(`[INFO] FRONTEND_URL: ${process.env.FRONTEND_URL || '(not set)'}`);
+  console.log(`[INFO] NEXT_PUBLIC_FRONTEND_URL: ${process.env.NEXT_PUBLIC_FRONTEND_URL || '(not set)'}`);
   console.log('============================================================\n');
 
   let connection;
@@ -62,60 +104,131 @@ async function main() {
     const schemaSQL = fs.readFileSync(schemaPath, 'utf8');
     const seedSQL = fs.readFileSync(seedPath, 'utf8');
 
-    const useMatch = schemaSQL.match(/USE\s+`?(\w+)`?\s*;/i);
-    if (!useMatch) {
-      throw new Error('No se encontró USE <database> en schema.sql');
-    }
-    const targetDB = useMatch[1];
-    const tablesSQL = schemaSQL.substring(useMatch.index + useMatch[0].length).trim();
-
-    const shouldDrop = process.env.MIGRATE_DROP_DATABASE === 'true';
+    const schemaStatements = parseSqlStatements(schemaSQL);
     const setupStatements = [];
-    if (shouldDrop) {
-      setupStatements.push(`DROP DATABASE IF EXISTS \`${targetDB}\`;`);
-    }
-    setupStatements.push(`CREATE DATABASE IF NOT EXISTS \`${targetDB}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
-    setupStatements.push(`USE \`${targetDB}\`;`);
-    const dbSetupSQL = setupStatements.join('\n');
+    const tableStatements = [];
+    let targetDB = DB_NAME;
 
-    console.log(`[INFO] BD objetivo: ${targetDB} (DROP=${shouldDrop})`);
+    for (const stmt of schemaStatements) {
+      const upper = stmt.toUpperCase();
+
+      if (upper.startsWith('DROP DATABASE')) {
+        if (NODE_ENV !== 'production' && process.env.MIGRATE_DROP_DATABASE === 'true') {
+          setupStatements.push(stmt);
+        }
+        continue;
+      }
+
+      if (upper.startsWith('CREATE DATABASE')) {
+        const dbNameMatch = stmt.match(/CREATE\s+DATABASE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?(\w+)`?/i);
+        if (dbNameMatch) targetDB = dbNameMatch[1];
+        if (!upper.includes('IF NOT EXISTS')) {
+          setupStatements.push(stmt.replace(/CREATE\s+DATABASE\s+`?(\w+)`?/i, 'CREATE DATABASE IF NOT EXISTS `$1`'));
+        } else {
+          setupStatements.push(stmt);
+        }
+        continue;
+      }
+
+      if (upper.startsWith('USE ')) {
+        setupStatements.push(stmt);
+        continue;
+      }
+
+      if (upper.startsWith('CREATE TABLE')) {
+        tableStatements.push(stmt.replace(/CREATE\s+TABLE\s+`?(\w+)`?/i, 'CREATE TABLE IF NOT EXISTS `$1`'));
+        continue;
+      }
+
+      setupStatements.push(stmt);
+    }
+
+    console.log(`[INFO] BD objetivo: ${targetDB}`);
     console.log('[INFO] Ejecutando setup de base de datos...');
-    await connection.query(dbSetupSQL);
+    for (const sql of setupStatements) {
+      if (!sql.trim()) continue;
+      await connection.query(sql + ';');
+    }
     console.log('[OK] Setup de base de datos ejecutado correctamente.\n');
 
     console.log(`[INFO] Seleccionando base de datos: ${targetDB}...`);
     await connection.query(`USE \`${targetDB}\``);
     console.log(`[OK] Base de datos seleccionada: ${targetDB}\n`);
 
-    if (tablesSQL) {
+    if (tableStatements.length > 0) {
       console.log('[INFO] Ejecutando tablas...');
-      const tableStatements = tablesSQL.split(/;\s*\n/).filter((s) => s.trim());
-      for (const stmt of tableStatements) {
-        const sql = stmt.trim();
-        if (sql) {
-          await connection.query(sql + ';');
-        }
-      }
-      console.log('[OK] Tablas creadas correctamente.\n');
-    }
-
-    console.log('[INFO] Ejecutando seed.sql...');
-    const seedStatements = seedSQL.split(/;\s*\n/).filter((s) => s.trim());
-    for (const stmt of seedStatements) {
-      const sql = stmt.trim();
-      if (sql) {
+      for (const sql of tableStatements) {
+        if (!sql.trim()) continue;
         await connection.query(sql + ';');
       }
+      console.log(`[OK] Tablas procesadas correctamente: ${tableStatements.length}\n`);
     }
-    console.log('[OK] seed.sql ejecutado correctamente.\n');
+
+    console.log('[INFO] Verificando estado de la base de datos...');
+    const [existingTablesRows] = await connection.query('SHOW TABLES');
+    const existingTableNames = existingTablesRows.map(row => Object.values(row)[0]);
+
+    const [roleCountRows] = await connection.query('SELECT COUNT(*) AS total FROM roles');
+    const roleCount = roleCountRows[0] ? parseInt(roleCountRows[0].total, 10) : 0;
+    const seedShouldRun = roleCount === 0;
+
+    if (seedShouldRun) {
+      console.log('[INFO] Datos base no encontrados, ejecutando seed.sql...');
+      const seedStatements = parseSqlStatements(seedSQL);
+      for (const sql of seedStatements) {
+        if (!sql.trim()) continue;
+        await connection.query(sql + ';');
+      }
+      console.log('[OK] seed.sql ejecutado correctamente.\n');
+    } else {
+      console.log(`[INFO] Seed omitido: la base de datos ya contiene datos (roles: ${roleCount}).\n`);
+    }
 
     console.log('[INFO] Verificando tablas creadas...');
-    const [tables] = await connection.query('SHOW TABLES');
-    const tableCount = tables.length;
+    const [tablesAfter] = await connection.query('SHOW TABLES');
+    const tableCount = tablesAfter.length;
     console.log(`[INFO] Tablas encontradas en ${targetDB}: ${tableCount}`);
-    if (tableCount === 0) {
-      throw new Error('Migración completada pero no se encontraron tablas. Revisa permisos de MySQL o variables de entorno.');
+
+    const requiredTables = [
+      'roles', 'permissions', 'role_permissions', 'users', 'customers',
+      'shipping_addresses', 'categories', 'products', 'product_categories',
+      'product_variants', 'product_images', 'stores', 'warehouses', 'store_users',
+      'inventory', 'inventory_movements', 'stock_transfers',
+      'carts', 'cart_items',
+      'orders', 'order_items', 'order_status_history',
+      'payments', 'payment_transactions', 'payment_webhooks',
+      'invoices', 'invoice_items', 'credit_notes',
+      'shipping_methods', 'promotions', 'coupons',
+      'audit_logs', 'settings'
+    ];
+
+    const missingTables = requiredTables.filter(t => !existingTableNames.includes(t));
+    if (missingTables.length > 0) {
+      console.error('[ERROR] Faltan tablas críticas:');
+      missingTables.forEach(t => console.error(` - ${t}`));
+      throw new Error('Faltan tablas críticas después de la migración');
     }
+
+    console.log('[OK] Todas las tablas críticas existen.\n');
+
+    console.log('[INFO] Verificando datos mínimos...');
+    const verifyTables = ['roles', 'users', 'categories', 'products', 'product_variants'];
+    const counts = {};
+    for (const table of verifyTables) {
+      const [rows] = await connection.query(`SELECT COUNT(*) AS total FROM ${table}`);
+      const total = rows[0] ? parseInt(rows[0].total, 10) : 0;
+      counts[table] = total;
+      console.log(`[VERIFY] ${table}: ${total}`);
+    }
+
+    const criticalEmpty = verifyTables.filter(t => counts[t] === 0);
+    if (criticalEmpty.length > 0) {
+      console.error('[ERROR] Faltan datos mínimos en tablas críticas:');
+      criticalEmpty.forEach(t => console.error(` - ${t}`));
+      throw new Error('Faltan datos mínimos después de la migración');
+    }
+
+    console.log('[OK] Datos mínimos verificados.\n');
 
     console.log('============================================================');
     console.log('MIGRACIÓN COMPLETADA EXITOSAMENTE');
