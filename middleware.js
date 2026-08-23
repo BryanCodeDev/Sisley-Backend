@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import appConfig from './config';
 
 function getTokenFromRequest(request) {
   const cookie = request.cookies.get('sisley_token');
@@ -11,11 +10,14 @@ function normalizeOrigin(origin) {
   return origin.replace(/\/$/, '');
 }
 
+function getAllowedOrigins() {
+  const raw = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://sisleyy.netlify.app,http://localhost:3000';
+  return raw.split(',').map(o => normalizeOrigin(o));
+}
+
 function getCorsHeaders(origin) {
   const normalizedOrigin = normalizeOrigin(origin);
-  const allowedOrigins = (appConfig.frontendUrl || 'http://localhost:3000')
-    .split(',')
-    .map(o => normalizeOrigin(o));
+  const allowedOrigins = getAllowedOrigins();
 
   if (!normalizedOrigin || !allowedOrigins.includes(normalizedOrigin)) {
     return null;
@@ -34,8 +36,11 @@ export async function middleware(request) {
   const origin = request.headers.get('origin');
   const corsHeaders = getCorsHeaders(origin);
 
+  console.log(`[MIDDLEWARE] ${request.method} ${pathname} origin=${origin}`);
+
   if (request.method === 'OPTIONS') {
     if (!corsHeaders) {
+      console.log(`[CORS] OPTIONS rechazado ${pathname} origin=${origin}`);
       return new NextResponse(null, { status: 403 });
     }
     console.log(`[CORS] OPTIONS preflight ${pathname} origin=${origin}`);
@@ -44,7 +49,6 @@ export async function middleware(request) {
 
   if (pathname.startsWith('/admin')) {
     const token = getTokenFromRequest(request);
-
     if (!token) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
@@ -57,6 +61,8 @@ export async function middleware(request) {
       response.headers.set(key, value);
     });
     console.log(`[CORS] ${request.method} ${pathname} origin=${origin}`);
+  } else if (origin) {
+    console.log(`[CORS] Sin headers ${pathname} origin=${origin} allowed=${JSON.stringify(getAllowedOrigins())}`);
   }
 
   return response;
