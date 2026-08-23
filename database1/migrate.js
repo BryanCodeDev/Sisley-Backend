@@ -67,9 +67,18 @@ async function main() {
       throw new Error('No se encontró USE <database> en schema.sql');
     }
     const targetDB = useMatch[1];
-    const dbSetupSQL = schemaSQL.substring(0, useMatch.index + useMatch[0].length).trim();
     const tablesSQL = schemaSQL.substring(useMatch.index + useMatch[0].length).trim();
 
+    const shouldDrop = process.env.MIGRATE_DROP_DATABASE === 'true';
+    const setupStatements = [];
+    if (shouldDrop) {
+      setupStatements.push(`DROP DATABASE IF EXISTS \`${targetDB}\`;`);
+    }
+    setupStatements.push(`CREATE DATABASE IF NOT EXISTS \`${targetDB}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
+    setupStatements.push(`USE \`${targetDB}\`;`);
+    const dbSetupSQL = setupStatements.join('\n');
+
+    console.log(`[INFO] BD objetivo: ${targetDB} (DROP=${shouldDrop})`);
     console.log('[INFO] Ejecutando setup de base de datos...');
     await connection.query(dbSetupSQL);
     console.log('[OK] Setup de base de datos ejecutado correctamente.\n');
@@ -100,10 +109,19 @@ async function main() {
     }
     console.log('[OK] seed.sql ejecutado correctamente.\n');
 
+    console.log('[INFO] Verificando tablas creadas...');
+    const [tables] = await connection.query('SHOW TABLES');
+    const tableCount = tables.length;
+    console.log(`[INFO] Tablas encontradas en ${targetDB}: ${tableCount}`);
+    if (tableCount === 0) {
+      throw new Error('Migración completada pero no se encontraron tablas. Revisa permisos de MySQL o variables de entorno.');
+    }
+
     console.log('============================================================');
     console.log('MIGRACIÓN COMPLETADA EXITOSAMENTE');
     console.log('============================================================');
-    console.log(`Base de datos: ${DB_NAME}`);
+    console.log(`Base de datos: ${targetDB}`);
+    console.log(`Tablas: ${tableCount}`);
     console.log('============================================================\n');
 
   } catch (error) {
