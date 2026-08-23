@@ -3,24 +3,11 @@ const path = require('path');
 const mysql = require('mysql2/promise');
 
 async function main() {
-  const envPath = path.join(__dirname, '..', '.env');
-  const envContent = fs.readFileSync(envPath, 'utf8');
-  const envVars = {};
-
-  envContent.split('\n').forEach(line => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) return;
-    const [key, ...valueParts] = trimmed.split('=');
-    if (key && valueParts.length) {
-      envVars[key.trim()] = valueParts.join('=').trim().replace(/^["']|["']$/g, '');
-    }
-  });
-
-  const DB_HOST = envVars.DB_HOST || 'localhost';
-  const DB_PORT = parseInt(envVars.DB_PORT || '3306', 10);
-  const DB_USER = envVars.DB_USER || 'root';
-  const DB_PASSWORD = envVars.DB_PASSWORD || '';
-  const DB_NAME = envVars.DB_NAME || 'sisley_platform';
+  const DB_HOST = process.env.DB_HOST || 'localhost';
+  const DB_PORT = parseInt(process.env.DB_PORT || '3306', 10);
+  const DB_USER = process.env.DB_USER || 'root';
+  const DB_PASSWORD = process.env.DB_PASSWORD || '';
+  const DB_NAME = process.env.DB_NAME || 'sisley_platform';
 
   console.log('============================================================');
   console.log('SISLEY COLOMBIA - MIGRATE');
