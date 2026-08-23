@@ -7,7 +7,7 @@
     "build": "next build",
     "db:setup": "node database1/migrate.js",
     "db:reset": "FORCE_RESET=true node database1/migrate.js",
-    "start": "node database1/migrate.js && next start"
+    "start": "node database1/migrate.js && npx next start -p $PORT"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",
