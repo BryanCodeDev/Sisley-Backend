@@ -22,7 +22,10 @@ async function handleCors(request) {
   const origin = getCorsOrigin(requestOrigin);
   const headers = corsHeaders(origin);
 
+  console.log(`[CORS] ${request.method} ${request.nextUrl?.pathname || request.url} origin=${requestOrigin} -> allow=${origin}`);
+
   if (request.method === 'OPTIONS') {
+    console.log(`[CORS] OPTIONS preflight -> 204`);
     return new Response(null, { status: 204, headers });
   }
 

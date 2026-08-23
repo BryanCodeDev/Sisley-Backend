@@ -9,7 +9,7 @@ if (typeof process !== 'undefined' && process.cwd && !process.env.NEXT_PUBLIC_SK
 module.exports = {
   env: process.env.NODE_ENV || 'development',
   port: process.env.PORT || 3001,
-  frontendUrl: process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000',
+  frontendUrl: process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000',
   database: {
     host: process.env.DB_HOST || process.env.MYSQLHOST || 'localhost',
     port: parseInt(process.env.DB_PORT || process.env.MYSQLPORT || '3306', 10),
