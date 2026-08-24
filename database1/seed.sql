@@ -125,13 +125,13 @@ INSERT INTO warehouses (id, name, store_id, address, status) VALUES
 -- ============================================================
 
 INSERT INTO categories (id, name, slug, description, image_url, status, position) VALUES
-(1, 'Mujer', 'mujer', 'Colección completa para mujer. Prendas atemporales y elegantes.', 'https://placehold.co/600x800/EEE/999?text=Mujer', 'active', 1),
-(2, 'Hombre', 'hombre', 'Colección completa para hombre. Estilo y sofisticación.', 'https://placehold.co/600x800/EEE/999?text=Hombre', 'active', 2),
-(3, 'Nueva Colección', 'nueva-coleccion', 'Lo más reciente de Sisley. Tendencias actuales.', 'https://placehold.co/600x800/EEE/999?text=Nueva+Coleccion', 'active', 3),
-(4, 'Ofertas', 'ofertas', 'Ofertas especiales por tiempo limitado.', 'https://placehold.co/600x800/EEE/999?text=Ofertas', 'active', 4),
-(5, 'Accesorios', 'accesorios', 'Complementos para completar tu look.', 'https://placehold.co/600x800/EEE/999?text=Accesorios', 'active', 5),
-(6, 'Denim', 'denim', 'Jeans y prendas en denim de la mejor calidad.', 'https://placehold.co/600x800/EEE/999?text=Denim', 'active', 6),
-(7, 'Outerwear', 'outerwear', 'Abrigos y chaquetas para todas las temporadas.', 'https://placehold.co/600x800/EEE/999?text=Outerwear', 'active', 7);
+(1, 'Mujer', 'mujer', 'Colección completa para mujer. Prendas atemporales y elegantes.', '/assets/catalog/blusa-satinada.webp', 'active', 1),
+(2, 'Hombre', 'hombre', 'Colección completa para hombre. Estilo y sofisticación.', '/assets/catalog/pantalon-wide-leg.webp', 'active', 2),
+(3, 'Nueva Colección', 'nueva-coleccion', 'Lo más reciente de Sisley. Tendencias actuales.', '/assets/catalog/Hero-Nueva-Colección.webp', 'active', 3),
+(4, 'Ofertas', 'ofertas', 'Ofertas especiales por tiempo limitado.', '/assets/catalog/vestido-midi-plisado.webp', 'active', 4),
+(5, 'Accesorios', 'accesorios', 'Complementos para completar tu look.', '/assets/catalog/1.webp', 'active', 5),
+(6, 'Denim', 'denim', 'Jeans y prendas en denim de la mejor calidad.', '/assets/catalog/2.webp', 'active', 6),
+(7, 'Outerwear', 'outerwear', 'Abrigos y chaquetas para todas las temporadas.', '/assets/catalog/3.webp', 'active', 7);
 
 -- ============================================================
 -- PRODUCTOS (30)
