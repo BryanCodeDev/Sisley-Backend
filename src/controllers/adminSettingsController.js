@@ -47,7 +47,7 @@ export async function uploadLogo(req, res) {
     }
 
     const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-      folder: 'techstore/settings',
+      folder: 'sisley/settings',
       resource_type: 'image',
       public_id: 'logo',
       overwrite: true,

@@ -1,8 +1,8 @@
-CREATE DATABASE IF NOT EXISTS `techstore`
+CREATE DATABASE IF NOT EXISTS `sisley`
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE `techstore`;
+USE `sisley`;
 
 CREATE TABLE IF NOT EXISTS `roles` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,

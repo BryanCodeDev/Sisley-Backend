@@ -297,8 +297,8 @@ const migrations = [
   (10, 'Anker', 'anker', TRUE);`,
 
   `INSERT IGNORE INTO settings (\`key\`, value, description) VALUES
-  ('site_name', '"TechStore"', 'Nombre del sitio'),
-  ('site_url', '"https://techstore.com"', 'URL del sitio'),
+  ('site_name', '"Sisley"', 'Nombre del sitio'),
+  ('site_url', '"https://sisleyy.netlify.app"', 'URL del sitio'),
   ('whatsapp_number', '"573209088777"', 'Número de WhatsApp para pedidos'),
   ('free_shipping_threshold', '100000', 'Monto mínimo para envío gratis'),
   ('default_currency', '"ARS"', 'Moneda por defecto'),
