@@ -3,6 +3,20 @@ import fs from 'fs'
 import path from 'path'
 
 const migrations = [
+  `DROP TABLE IF EXISTS reviews`,
+  `DROP TABLE IF EXISTS order_items`,
+  `DROP TABLE IF EXISTS order_status_history`,
+  `DROP TABLE IF EXISTS payments`,
+  `DROP TABLE IF EXISTS cart_items`,
+  `DROP TABLE IF EXISTS product_images`,
+  `DROP TABLE IF EXISTS orders`,
+  `DROP TABLE IF EXISTS products`,
+  `DROP TABLE IF EXISTS categories`,
+  `DROP TABLE IF EXISTS brands`,
+  `DROP TABLE IF EXISTS users`,
+  `DROP TABLE IF EXISTS roles`,
+  `DROP TABLE IF EXISTS settings`,
+
   `CREATE TABLE IF NOT EXISTS roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
