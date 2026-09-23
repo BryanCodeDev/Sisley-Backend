@@ -46,8 +46,10 @@ const limiter = rateLimit({
 })
 app.use('/api/', limiter)
 
+let dbConnected = false
+
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() })
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), db: dbConnected })
 })
 
 app.use('/api/auth', authRoutes)
@@ -63,18 +65,20 @@ app.use(notFound)
 app.use(errorHandler)
 
 async function start() {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`)
+    console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`)
+  })
+
   try {
     await ensureDatabase()
     await runMigrations()
     await runSeed()
     await connectDB()
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`)
-      console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`)
-    })
+    dbConnected = true
+    console.log('✅ Database fully initialized')
   } catch (error) {
-    console.error('Failed to start server:', error)
-    process.exit(1)
+    console.error('Database initialization error:', error.message)
   }
 }
 
