@@ -6,11 +6,13 @@ import { generateOrderNumber } from '../utils/helpers.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
 const JWT_EXPIRES_IN = '7d'
+const isProduction = process.env.NODE_ENV === 'production'
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
   maxAge: 7 * 24 * 60 * 60 * 1000,
+  domain: process.env.COOKIE_DOMAIN || undefined,
 }
 
 function generateToken(user) {
