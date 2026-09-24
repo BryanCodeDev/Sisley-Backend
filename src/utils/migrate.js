@@ -4,22 +4,6 @@ import fs from 'fs'
 import path from 'path'
 
 const migrations = [
-  `DROP TABLE IF EXISTS reviews`,
-  `DROP TABLE IF EXISTS order_items`,
-  `DROP TABLE IF EXISTS order_status_history`,
-  `DROP TABLE IF EXISTS payment_webhooks`,
-  `DROP TABLE IF EXISTS payment_transactions`,
-  `DROP TABLE IF EXISTS payments`,
-  `DROP TABLE IF EXISTS cart_items`,
-  `DROP TABLE IF EXISTS product_images`,
-  `DROP TABLE IF EXISTS orders`,
-  `DROP TABLE IF EXISTS products`,
-  `DROP TABLE IF EXISTS categories`,
-  `DROP TABLE IF EXISTS brands`,
-  `DROP TABLE IF EXISTS users`,
-  `DROP TABLE IF EXISTS roles`,
-  `DROP TABLE IF EXISTS settings`,
-
   `CREATE TABLE IF NOT EXISTS roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
@@ -357,6 +341,16 @@ export async function runMigrations() {
   try {
     // Disable foreign key checks to allow dropping tables in any order
     await conn.query('SET FOREIGN_KEY_CHECKS = 0')
+
+    // Drop all existing user tables to ensure a clean schema
+    const [tables] = await conn.query(
+      `SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_TYPE = 'BASE TABLE'`,
+      [process.env.DB_NAME]
+    )
+    for (const row of tables) {
+      await conn.query(`DROP TABLE IF EXISTS \`${row.TABLE_NAME}\``)
+      console.log(`🗑️  Dropped table ${row.TABLE_NAME}`)
+    }
 
     for (let i = 0; i < migrations.length; i++) {
       try {
