@@ -28,7 +28,12 @@ function setTokenCookie(res, token) {
 }
 
 function clearTokenCookie(res) {
-  res.clearCookie('token', COOKIE_OPTIONS)
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    domain: process.env.COOKIE_DOMAIN || undefined,
+  })
 }
 
 export async function register(req, res) {
