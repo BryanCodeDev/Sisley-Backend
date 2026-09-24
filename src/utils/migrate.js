@@ -1,10 +1,9 @@
 import { query } from '../config/database.js'
+import mysql from 'mysql2/promise'
 import fs from 'fs'
 import path from 'path'
 
 const migrations = [
-  `SET FOREIGN_KEY_CHECKS = 0`,
-
   `DROP TABLE IF EXISTS reviews`,
   `DROP TABLE IF EXISTS order_items`,
   `DROP TABLE IF EXISTS order_status_history`,
@@ -20,8 +19,6 @@ const migrations = [
   `DROP TABLE IF EXISTS users`,
   `DROP TABLE IF EXISTS roles`,
   `DROP TABLE IF EXISTS settings`,
-
-  `SET FOREIGN_KEY_CHECKS = 1`,
 
   `CREATE TABLE IF NOT EXISTS roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -346,16 +343,37 @@ function splitSqlStatements(sql) {
 
 export async function runMigrations() {
   console.log('🔄 Running migrations...')
-  for (let i = 0; i < migrations.length; i++) {
-    try {
-      await query(migrations[i])
-      console.log(`✅ Migration ${i + 1} completed`)
-    } catch (error) {
-      console.error(`❌ Migration ${i + 1} failed:`, error.message)
-      throw error
+
+  // Use a dedicated connection so SET FOREIGN_KEY_CHECKS applies to all statements
+  const conn = await mysql.createConnection({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    charset: 'utf8mb4',
+  })
+
+  try {
+    // Disable foreign key checks to allow dropping tables in any order
+    await conn.query('SET FOREIGN_KEY_CHECKS = 0')
+
+    for (let i = 0; i < migrations.length; i++) {
+      try {
+        await conn.query(migrations[i])
+        console.log(`✅ Migration ${i + 1} completed`)
+      } catch (error) {
+        console.error(`❌ Migration ${i + 1} failed:`, error.message)
+        throw error
+      }
     }
+
+    // Re-enable foreign key checks
+    await conn.query('SET FOREIGN_KEY_CHECKS = 1')
+    console.log('✅ All migrations completed')
+  } finally {
+    await conn.end()
   }
-  console.log('✅ All migrations completed')
 }
 
 export async function runSeed() {
